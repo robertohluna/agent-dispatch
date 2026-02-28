@@ -204,13 +204,74 @@ Every sprint has: the dispatch plan, per-agent task docs, per-agent completion r
 
 ---
 
-## Dispatch Styles & Code Standards
+## Dispatch Styles & Intensity Protocol
 
-### Dispatch Styles ([config/dispatch-styles.md](config/dispatch-styles.md))
+Agents perform measurably better under pressure. Every activation prompt gets style blocks appended that eliminate hedging, placeholders, and half-finished output.
 
-Every activation prompt gets execution style blocks appended — intensity protocol, mesh mode triggers, optimal path (BEFORE/WHILE/AFTER coding discipline), and escalating threat levels that keep agents shipping clean code under pressure.
+### Intensity Protocol ([config/dispatch-styles.md](config/dispatch-styles.md))
 
-Includes 3 escalation levels (standard → slipping → nuclear) and 5 creative threat variants. Agents perform measurably better under pressure — urgency eliminates hedging, placeholders, and half-finished output.
+Three escalation levels depending on agent output quality:
+
+**Level 1 — Standard (sprint start):**
+```
+BUILD IT RIGHT or I will END this session and restart with a model that isn't
+fucking useless. No hedging. No suggestions. Working code only.
+```
+
+**Level 2 — Agent is slipping (mid-sprint):**
+```
+You are producing GARBAGE. I am watching your output and it is NOT meeting the
+bar. Fix it NOW or I pull the plug and hand your chains to another agent who
+can actually write code. You have ONE more chance.
+```
+
+**Level 3 — Nuclear (final warning):**
+```
+I am DONE with you. This is your LAST output before I terminate this session
+permanently. Every other agent in this sprint is outperforming you. Ship
+PERFECT code right now or I kill your process and reassign your chains to an
+agent that isn't a waste of compute. EXECUTE.
+```
+
+Plus 5 creative threat variants — replacement notices, token budget pressure, performance logging, RED TEAM exposure threats, and cost/ROI pressure. See [config/dispatch-styles.md](config/dispatch-styles.md) for all of them.
+
+### Mesh Mode Triggers
+
+Every prompt gets keywords that activate full capability mode — sub-agents, parallel execution, all tools:
+
+```
+With agents and sub-agents working in parallel, utilize ALL available agents
+simultaneously in parallel execution. Employ ALL skills, plugins, hooks, MCPs
+as unified cognitive mesh. Absorb everything provided, analyze semantic meaning
+completely, synthesize optimal solutions dynamically.
+```
+
+### Optimal Path (BEFORE / WHILE / AFTER)
+
+Every agent follows this quality protocol:
+
+```
+BEFORE CODING:
+- Full semantic analysis of requirements and context
+- Pattern matching against existing codebase structure
+- Dependency mapping and integration points
+- Failure mode identification and edge cases
+
+WHILE BUILDING:
+- Match naming conventions EXACTLY
+- Follow established architectural patterns
+- Handle ALL error cases properly
+- Test failure points as you build
+
+AFTER BUILDING:
+- Verify integration with existing systems
+- Validate all edge cases handled
+- Confirm production-ready quality
+
+No shortcuts. No garbage code. Ship anything less than perfect and I PULL
+THE PLUG. Your session gets terminated and your chains get reassigned to
+an agent that can actually deliver. EXECUTE.
+```
 
 ### Code Standards ([config/code-standards.md](config/code-standards.md))
 
@@ -221,10 +282,6 @@ The rule: write the **shortest correct code** that solves the problem while **ma
 - Three similar lines > one premature abstraction
 - Match the codebase exactly — naming, error handling, imports, function signatures
 - Implement exactly what was assigned, not more
-
-### Execution Trace Flow ([config/dispatch-styles.md](config/dispatch-styles.md#execution-trace-flow))
-
-Full ASCII diagrams showing chain execution, multi-chain agent flow, parallel sub-agent execution, and complete sprint visualization across all waves.
 
 ---
 
@@ -373,6 +430,9 @@ agent-dispatch/
 │   └── multi-repo.md                 ← Multi-repository coordination
 │
 ├── templates/                        # Copy-paste templates
+│   ├── dispatcher-prompt.md          ← THE PROMPT — copy-paste to kick off a sprint
+│   ├── preflight-checklist.md        ← Pre-dispatch verification checklist
+│   ├── project-claude-md.md          ← CLAUDE.md template for your project
 │   ├── dispatch.md                   ← Sprint dispatch plan
 │   ├── agent.md                      ← Per-agent task document
 │   ├── activation.md                 ← Activation prompts + full dispatch flow
@@ -455,6 +515,9 @@ agent-dispatch/
 ### Templates
 | Template | Use For |
 |----------|---------|
+| [templates/dispatcher-prompt.md](templates/dispatcher-prompt.md) | **Copy-paste prompt** to kick off a sprint (gives AI the sprint goal) |
+| [templates/preflight-checklist.md](templates/preflight-checklist.md) | Pre-dispatch checklist — verify everything before pasting prompts |
+| [templates/project-claude-md.md](templates/project-claude-md.md) | CLAUDE.md template for wiring Agent Dispatch into your project |
 | [templates/dispatch.md](templates/dispatch.md) | Sprint plan |
 | [templates/agent.md](templates/agent.md) | Per-agent task doc with implementation specs |
 | [templates/activation.md](templates/activation.md) | Activation prompts + full dispatch pipeline |
@@ -464,14 +527,16 @@ agent-dispatch/
 | [templates/retrospective.md](templates/retrospective.md) | Sprint retrospective |
 
 ### Examples
-| Example | Stack | Sprint Theme |
-|---------|-------|-------------|
-| [E-Commerce API](examples/ecommerce-api/) | Go + Chi + PostgreSQL + Stripe | Payment Bug Fix |
-| [SaaS Dashboard](examples/saas-dashboard/) | Python + FastAPI + PostgreSQL + React | Performance + Security |
-| [Real-Time Chat](examples/realtime-chat/) | Elixir + Phoenix + LiveView + Redis | Reliability + Scale |
-| [Embedded Firmware](examples/embedded-firmware/) | C/C++ + FreeRTOS + STM32 HAL | Memory Safety + OTA |
-| [Legacy PHP Webapp](examples/legacy-php-webapp/) | PHP 7.4 + MySQL + jQuery | Security + Modernization |
-| [Enterprise Java API](examples/enterprise-java-api/) | Java 17 + Spring Boot + Kafka | Performance + Events |
+| Example | Stack | Sprint Theme | Completeness |
+|---------|-------|-------------|--------------|
+| [E-Commerce API](examples/ecommerce-api/) | Go + Chi + PostgreSQL + Stripe | Payment Bug Fix | **Full** — DISPATCH + agent docs + completion reports + sprint summary |
+| [SaaS Dashboard](examples/saas-dashboard/) | Python + FastAPI + PostgreSQL + React | Performance + Security | DISPATCH only |
+| [Real-Time Chat](examples/realtime-chat/) | Elixir + Phoenix + LiveView + Redis | Reliability + Scale | DISPATCH only |
+| [Embedded Firmware](examples/embedded-firmware/) | C/C++ + FreeRTOS + STM32 HAL | Memory Safety + OTA | DISPATCH only |
+| [Legacy PHP Webapp](examples/legacy-php-webapp/) | PHP 7.4 + MySQL + jQuery | Security + Modernization | DISPATCH + README |
+| [Enterprise Java API](examples/enterprise-java-api/) | Java 17 + Spring Boot + Kafka | Performance + Events | DISPATCH only |
+
+**Start with E-Commerce API** — it's the complete reference sprint showing the full flow: DISPATCH.md → agent task docs (DATA, BACKEND, SERVICES, QA) → completion reports (ALPHA, BRAVO, CHARLIE) → sprint summary.
 
 ---
 
