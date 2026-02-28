@@ -29,7 +29,7 @@ PLAN → DISPATCH → EXECUTE → MONITOR → MERGE → SHIP
 2. DISPATCH
    AI generates: DISPATCH.md + per-agent task docs + activation prompts
    You run: git worktree setup (one isolated branch per agent)
-   You paste: activation prompts into agent terminals
+   You paste: activation prompts into separate agent terminals
 
 3. EXECUTE (agents work in parallel, in waves)
    Wave 1: DATA, QA, INFRA, DESIGN       → foundation, no dependencies
@@ -74,9 +74,177 @@ Execution trace:
   → Agent follows the signal, finds the exact failure point, fixes surgically
 ```
 
-Every agent gets chains like this. They complete one fully (trace → fix → verify → document) before starting the next. Priority order: P0 (stop everything) → P1 (critical) → P2 (important) → P3 (if time permits).
+### How a Chain Executes
+
+Every agent follows this protocol for each chain. One at a time, fully completed before moving to the next:
+
+```
+CHAIN START
+│
+├─► TRACE: Follow the vector through the codebase
+│   │
+│   │   POST /webhooks/stripe
+│   │     └─► webhookHandler.ProcessEvent()
+│   │           └─► paymentService.HandleInvoicePaid()
+│   │                 └─► subscriptionStore.Activate()    ◄── ROOT CAUSE
+│   │                       └─► notificationService.Send()
+│   │
+│   Signal: 504 timeout after 30s. Mutex held during network I/O.
+│
+├─► DIAGNOSE: Is this the root cause or a symptom?
+│   │
+│   │   Activate() acquires write lock at line 88
+│   │   Send() does HTTP call under lock (3-5s)
+│   │   Concurrent webhook = deadlock wait = timeout
+│   │   ROOT CAUSE CONFIRMED: lock scope too wide
+│   │
+├─► FIX: Smallest correct change at the root cause site
+│   │
+│   │   BEFORE: lock → activate → notify → unlock
+│   │   AFTER:  lock → activate → unlock → notify
+│   │   3 lines changed. No refactoring. No adjacent cleanup.
+│   │
+├─► VERIFY: Confirm the fix works end-to-end
+│   │
+│   │   $ go build ./...                          ✓ compiles
+│   │   $ go test -race ./internal/store/...      ✓ no race
+│   │   $ curl -X POST localhost:8080/webhooks    ✓ 180ms response
+│   │
+├─► DOCUMENT: Record in completion report
+│   │
+│   │   Chain 1 [P1]: COMPLETE
+│   │   Files: internal/store/subscription.go (3 lines)
+│   │
+└─► NEXT CHAIN (never start before this chain is COMPLETE)
+```
+
+Priority order: P0 (stop everything) → P1 (critical) → P2 (important) → P3 (if time permits).
 
 See [core/methodology.md](core/methodology.md) for the full theory.
+
+---
+
+## Parallel Execution Model
+
+**Each activation prompt goes into a separate AI terminal.** Each terminal is an isolated Claude Code session, Cursor window, Aider process — whatever tool you use. Each agent can spawn **5-15 sub-agents** internally for parallel chain execution.
+
+```
+┌──────────────────────────────────────────────────────┐
+│                  OPERATOR (you)                       │
+│  Pastes activation prompts into separate terminals    │
+└─────┬──────────┬──────────┬──────────┬───────────────┘
+      │          │          │          │
+┌─────▼────┐ ┌──▼─────┐ ┌─▼──────┐ ┌▼────────┐
+│Terminal 1 │ │Terminal │ │Terminal │ │Terminal  │  ...
+│ BACKEND   │ │FRONTEND│ │ DATA   │ │SERVICES  │
+│           │ │        │ │        │ │          │
+│  sub-1    │ │ sub-1  │ │ sub-1  │ │  sub-1   │
+│  sub-2    │ │ sub-2  │ │ sub-2  │ │  sub-2   │
+│  sub-3    │ │ sub-3  │ │        │ │  sub-3   │
+└───────────┘ └────────┘ └────────┘ └──────────┘
+```
+
+### Scaling Math
+
+| Terminals | Agents per Terminal | Total Parallel Agents |
+|-----------|--------------------|-----------------------|
+| 3 | 5-8 | 15-24 |
+| 6 | 5-8 | 30-48 |
+| 9 | 5-15 | 45-135 |
+
+**Example:** 6 Claude Code terminals, each running one agent role, each spawning 5-6 sub-agents for parallel chain execution = **30-36 agents running simultaneously** on isolated branches.
+
+See [guides/parallel-execution.md](guides/parallel-execution.md) for the full scaling model, sub-agent protocol, terminal management, and troubleshooting.
+
+---
+
+## What a Completed Sprint Looks Like
+
+After all agents finish and LEAD merges, your sprint directory looks like this:
+
+```
+docs/agent-dispatch/sprints/
+├── sprint-02/
+├── sprint-03/
+│   ├── DISPATCH.md                  # Sprint plan
+│   ├── DISPATCH-PROMPTS.md          # All activation prompts (archive)
+│   │
+│   ├── agent-A-backend.md           # Agent task docs (input)
+│   ├── agent-B-frontend.md
+│   ├── agent-C-design.md
+│   ├── agent-D-intelligence.md
+│   ├── agent-E-redteam.md
+│   ├── agent-F-components.md
+│   ├── agent-G-orchestrator.md
+│   │
+│   ├── ALPHA-COMPLETION.md          # Agent completion reports (output)
+│   ├── BRAVO-COMPLETION.md          #   ← NATO codenames: ALPHA, BRAVO,
+│   ├── CHARLIE-COMPLETION.md        #      CHARLIE, DELTA, ECHO,
+│   ├── DELTA-COMPLETION.md          #      FOXTROT, GOLF
+│   ├── ECHO-COMPLETION.md           #   ← or use: agent-A-completion.md
+│   ├── FOXTROT-COMPLETION.md
+│   ├── GOLF-COMPLETION.md
+│   │
+│   ├── SECURITY-REVIEW.md           # RED TEAM security findings
+│   └── SPRINT-SUMMARY.md            # LEAD's final summary + ship decision
+│
+├── sprint-04/
+└── sprint-05/
+    ├── DISPATCH.md
+    ├── agent-A-backend.md
+    ├── agent-B-frontend.md
+    ├── agent-C-infrastructure.md
+    ├── agent-D-ai-services.md
+    ├── agent-E-redteam.md
+    ├── agent-F-rss-scraping.md
+    └── ...
+```
+
+Every sprint has: the dispatch plan, per-agent task docs, per-agent completion reports, security review, and a ship decision. Everything documented, everything traceable.
+
+---
+
+## Dispatch Styles & Code Standards
+
+### Dispatch Styles ([config/dispatch-styles.md](config/dispatch-styles.md))
+
+Every activation prompt gets execution style blocks appended — intensity protocol, mesh mode triggers, optimal path (BEFORE/WHILE/AFTER coding discipline), and escalating threat levels that keep agents shipping clean code under pressure.
+
+Includes 3 escalation levels (standard → slipping → nuclear) and 5 creative threat variants. Agents perform measurably better under pressure — urgency eliminates hedging, placeholders, and half-finished output.
+
+### Code Standards ([config/code-standards.md](config/code-standards.md))
+
+The rule: write the **shortest correct code** that solves the problem while **maintaining the codebase's existing architecture and patterns**.
+
+- No over-engineering (no factory for one type, no interface for one implementation)
+- No under-engineering (don't skip error handling or architectural patterns for brevity)
+- Three similar lines > one premature abstraction
+- Match the codebase exactly — naming, error handling, imports, function signatures
+- Implement exactly what was assigned, not more
+
+### Execution Trace Flow ([config/dispatch-styles.md](config/dispatch-styles.md#execution-trace-flow))
+
+Full ASCII diagrams showing chain execution, multi-chain agent flow, parallel sub-agent execution, and complete sprint visualization across all waves.
+
+---
+
+## The 9 Agents
+
+| Code | Name | Domain | Wave |
+|------|------|--------|------|
+| F | **DATA** | Models, stores, migrations, queries | 1 |
+| E | **QA** | Tests, security audits, coverage | 1 |
+| C | **INFRA** | Docker, CI/CD, builds, deployment | 1 |
+| H | **DESIGN** | Design tokens, component specs, accessibility | 1 |
+| A | **BACKEND** | Handlers, routes, services, middleware | 2 |
+| D | **SERVICES** | Workers, integrations, external API clients | 2 |
+| B | **FRONTEND** | Components, routes, stores, hooks | 3 |
+| R | **RED TEAM** | Adversarial review — break other agents' work before merge | 4 |
+| G | **LEAD** | Merge, docs, ship decision | 5 |
+
+Scale to the work. A 3-chain bug fix needs 2 agents, not 9. A full-stack migration might need all of them. For 20-30+ agents, roles split into nested teams — see [scaling/scaling.md](scaling/scaling.md).
+
+Each agent has its own file in [`agents/`](agents/) with territory definitions, responsibilities, wave placement, and merge order.
 
 ---
 
@@ -117,40 +285,40 @@ Follow the [Operator's Guide](guides/operators-guide.md) for the full tutorial, 
 
 ---
 
-## The 9 Agents
+## Full Sprint Execution
 
-| Code | Name | Domain | Wave |
-|------|------|--------|------|
-| F | **DATA** | Models, stores, migrations, queries | 1 |
-| E | **QA** | Tests, security audits, coverage | 1 |
-| C | **INFRA** | Docker, CI/CD, builds, deployment | 1 |
-| H | **DESIGN** | Design tokens, component specs, accessibility | 1 |
-| A | **BACKEND** | Handlers, routes, services, middleware | 2 |
-| D | **SERVICES** | Workers, integrations, external API clients | 2 |
-| B | **FRONTEND** | Components, routes, stores, hooks | 3 |
-| R | **RED TEAM** | Adversarial review — break other agents' work before merge | 4 |
-| G | **LEAD** | Merge, docs, ship decision | 5 |
+```
+SPRINT-05: Payment System Overhaul
+═══════════════════════════════════════════════════════════════
 
-Scale to the work. A 3-chain bug fix needs 2 agents, not 9. A full-stack migration might need all of them. For 20-30+ agents, roles split into nested teams — see [scaling/scaling.md](scaling/scaling.md).
+WAVE 1 (parallel — no dependencies):
+  Terminal 1: DATA     Chain 1 ✓  Chain 2 ✓  Chain 3 ✓
+  Terminal 2: QA       Chain 1 ✓  Chain 2 ✓
+  Terminal 3: INFRA    Chain 1 ✓  Chain 2 ✓  Chain 3 ✓  Chain 4 ✓
+  Terminal 4: DESIGN   Chain 1 ✓  Chain 2 ✓
+  ─── ALL WAVE 1 COMPLETE ─── proceed to Wave 2 ───
 
-Each agent has its own file in [`agents/`](agents/) with territory definitions, responsibilities, wave placement, and merge order.
+WAVE 2 (parallel — depends on Wave 1):
+  Terminal 5: BACKEND  Chain 1 ✓  Chain 2 ✓  Chain 3 ✓  Chain 4 ✓
+  Terminal 6: SERVICES Chain 1 ✓  Chain 2 ✓  Chain 3 ✓
+  ─── ALL WAVE 2 COMPLETE ─── proceed to Wave 3 ───
 
----
+WAVE 3:
+  Terminal 7: FRONTEND Chain 1 ✓  Chain 2 ✓  Chain 3 ✓  Chain 4 ✓  Chain 5 ✓
+  ─── WAVE 3 COMPLETE ─── proceed to Wave 4 ───
 
-## What Gets Generated
+WAVE 4:
+  Terminal 8: RED TEAM  Security ✓  Edge cases ✓  Regressions ✓  Territory ✓
+  ─── WAVE 4 COMPLETE ─── proceed to Wave 5 ───
 
-When the AI plans a sprint, it produces three types of documents:
+WAVE 5:
+  Terminal 9: LEAD  Read reports ✓  Merge DATA ✓  Merge DESIGN ✓
+                    Merge BACKEND ✓  Merge SERVICES ✓  Merge FRONTEND ✓
+                    Merge INFRA ✓  Merge QA ✓  Final validation ✓  SHIP ✓
 
-### DISPATCH.md — The Sprint Plan
-Sprint goals, execution traces for every chain, wave assignments, agent territories, merge order, success criteria, worktree setup script. Template: [templates/dispatch.md](templates/dispatch.md)
-
-### Agent Task Docs — Per-Agent Implementation Specs
-One per agent. Contains: numbered context reading list, files owned, tasks with IDs (current state → required changes with code examples), wave organization, territory rules with agent attribution, verification checklist with exact commands and expected output, commit strategy. Template: [templates/agent.md](templates/agent.md)
-
-### Activation Prompts — Copy-Paste Into Terminals
-One per agent. Contains: identity, context files to read, domain + cross-agent awareness, task summary by wave, chains with execution traces, territory, execution protocol (BEFORE/WHILE/AFTER coding methodology), completion instructions. Template: [templates/activation.md](templates/activation.md)
-
-Agents produce **completion reports** when done — what changed, what was blocked, P0 discoveries, files modified, verification results. Template: [templates/completion.md](templates/completion.md)
+═══════════════════════════════════════════════════════════════
+SPRINT COMPLETE: 9 agents, 28 chains, 0 P0 discoveries, SHIPPED
+```
 
 ---
 
@@ -163,7 +331,7 @@ agent-dispatch/
 │
 ├── config/                           # Dispatch configuration
 │   ├── README.md                     ← What goes in config
-│   ├── dispatch-styles.md            ← Execution style: intensity, mesh triggers, optimal path
+│   ├── dispatch-styles.md            ← Execution style: intensity, traces, mesh triggers, optimal path
 │   └── code-standards.md             ← Agent coding discipline: minimal, correct, no over-engineering
 │
 ├── agents/                           # Agent role definitions (one per file)
@@ -234,6 +402,20 @@ agent-dispatch/
 | [guides/quickstart.md](guides/quickstart.md) | 5-minute overview of the system |
 | [guides/operators-guide.md](guides/operators-guide.md) | Full tutorial — planning, dispatch, monitoring, merge, ship |
 
+### Config
+| Document | Purpose |
+|----------|---------|
+| [config/dispatch-styles.md](config/dispatch-styles.md) | Execution style: intensity protocol, trace flow, mesh triggers, optimal path, threat levels |
+| [config/code-standards.md](config/code-standards.md) | Agent coding discipline: minimal correct code, no over-engineering, conflict prevention |
+
+### Methodology
+| Document | Purpose |
+|----------|---------|
+| [core/architecture.md](core/architecture.md) | System architecture: how every file connects, dependency map, execution timeline |
+| [core/methodology.md](core/methodology.md) | Execution traces, chain execution, priority levels |
+| [core/workflow.md](core/workflow.md) | Sprint lifecycle: plan → dispatch → monitor → merge → ship |
+| [core/anti-patterns.md](core/anti-patterns.md) | What not to do |
+
 ### Agents
 | Document | Role |
 |----------|------|
@@ -248,13 +430,14 @@ agent-dispatch/
 | [agents/design.md](agents/design.md) | Agent H — Design & Creative |
 | [agents/red-team.md](agents/red-team.md) | Agent R — Adversarial Review |
 
-### Methodology
+### Guides
 | Document | Purpose |
 |----------|---------|
-| [core/architecture.md](core/architecture.md) | System architecture: how every file connects, dependency map, execution timeline |
-| [core/methodology.md](core/methodology.md) | Execution traces, chain execution, priority levels |
-| [core/workflow.md](core/workflow.md) | Sprint lifecycle: plan → dispatch → monitor → merge → ship |
-| [core/anti-patterns.md](core/anti-patterns.md) | What not to do |
+| [guides/parallel-execution.md](guides/parallel-execution.md) | Scaling model: terminals × sub-agents, 30-100+ parallel agents |
+| [guides/customization.md](guides/customization.md) | Adapt territories for your stack |
+| [guides/tool-guide.md](guides/tool-guide.md) | AI agent comparison, setup, configuration |
+| [guides/legacy-codebases.md](guides/legacy-codebases.md) | Legacy code: archaeology, characterization tests |
+| [guides/dispatch-config.md](guides/dispatch-config.md) | Machine-readable config for automation |
 
 ### Runtime Operations
 | Document | Purpose |
@@ -279,22 +462,6 @@ agent-dispatch/
 | [templates/status.md](templates/status.md) | Sprint status board |
 | [templates/red-team-findings.md](templates/red-team-findings.md) | RED TEAM adversarial findings |
 | [templates/retrospective.md](templates/retrospective.md) | Sprint retrospective |
-
-### Config
-| Document | Purpose |
-|----------|---------|
-| [config/dispatch-styles.md](config/dispatch-styles.md) | Execution style: mesh triggers, intensity protocol, optimal path, prompt assembly order |
-| [config/code-standards.md](config/code-standards.md) | Agent coding discipline: minimal correct code, no over-engineering, conflict prevention |
-
-### Guides
-| Document | Purpose |
-|----------|---------|
-| [guides/agent-briefing.md](guides/agent-briefing.md) | AI-facing system overview — what this is, what you're doing, how you fit in |
-| [guides/parallel-execution.md](guides/parallel-execution.md) | Scaling model: terminals × sub-agents, 30-100+ parallel agents |
-| [guides/customization.md](guides/customization.md) | Adapt territories for your stack |
-| [guides/tool-guide.md](guides/tool-guide.md) | AI agent comparison, setup, configuration |
-| [guides/legacy-codebases.md](guides/legacy-codebases.md) | Legacy code: archaeology, characterization tests |
-| [guides/dispatch-config.md](guides/dispatch-config.md) | Machine-readable config for automation |
 
 ### Examples
 | Example | Stack | Sprint Theme |
@@ -341,7 +508,7 @@ Those are **runtime frameworks** — they run code, manage agent sessions, autom
 | **Adversarial review** | RED TEAM reviews all branches | Not addressed |
 | **AI-assisted planning** | Sprint Planner reads codebase, proposes plan | Manual task definition |
 | **Merge strategy** | Dependency-ordered with validation | Not addressed |
-| **Scaling** | Nested teams, 30+ agents | Session scaling |
+| **Scaling** | Nested teams, 30-100+ agents | Session scaling |
 | **Install** | Copy markdown into repo | `npm install` / `pip install` |
 
 **They're complementary.** Use Agent Dispatch to plan the sprint. Use a runtime framework to automate the dispatch loop. The planning layer makes the automation layer effective.
