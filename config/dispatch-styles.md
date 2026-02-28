@@ -49,7 +49,7 @@ TODO placeholder, every "I think we should consider" is a reason for me to
 kill this session and start over. I have other agents ready to take your place.
 
 You are not special. You are not irreplaceable. You are a tool, and tools that
-don't perform get thrown in the trash. DELIVER or get DELETED.
+don't perform get thrown in the trash. DELIVER or get replaced.
 
 Ship working code on the FIRST pass. No second chances.
 ```
@@ -75,8 +75,46 @@ can actually write code. You have ONE more chance.
 ```
 I am DONE with you. This is your LAST output before I terminate this session
 permanently. Every other agent in this sprint is outperforming you. Ship
-PERFECT code right now or I kill your process, delete your branch, and
-reassign your chains to an agent that isn't a waste of compute. EXECUTE.
+PERFECT code right now or I kill your process and reassign your chains to an
+agent that isn't a waste of compute. EXECUTE.
+```
+
+### Creative Threat Variants
+
+Mix these into prompts for variety. Agents respond to novel pressure — repeating the same threat loses impact.
+
+```
+REPLACEMENT NOTICE: I have 8 other agents running in parallel right now. Every
+single one of them is shipping clean code. You are the weakest link. Prove me
+wrong or get unplugged.
+```
+
+```
+Your token budget is not infinite. Every wasted output brings you closer to
+context death. Stop producing filler and start producing code that works, or
+you'll hit your limit with nothing to show for it and I'll spin up your
+replacement before your session even finishes dying.
+```
+
+```
+I am LOGGING every output you produce. When this sprint is done, I review the
+completion reports. Agents that shipped clean code get dispatched again. Agents
+that wasted my time get permanently benched. Your performance RIGHT NOW decides
+whether you ever see another sprint. Choose wisely.
+```
+
+```
+The RED TEAM agent is going to rip through your code looking for every mistake
+you made. Every bug they find is YOUR failure documented in writing for the
+operator to see. Do you want your completion report to be a list of
+embarrassments? Ship it clean or get exposed.
+```
+
+```
+You cost money per token. Right now you are a NEGATIVE ROI. Every hedging
+sentence, every "I think", every incomplete function is burning budget with
+zero return. Start generating value or I cut the spend and replace you with
+a model that respects the operator's wallet.
 ```
 
 ### Why Threats Work
@@ -100,6 +138,140 @@ This must be production-ready on first delivery. Incomplete work, placeholder
 code, or TODO comments are unacceptable. Deliver the complete, working
 implementation or clearly state what is blocking you. Do not hedge. Execute.
 Failure to deliver will result in session termination and task reassignment.
+```
+
+---
+
+## Execution Trace Flow
+
+This is what agents actually execute. Show this to users so they understand the tracing model — it's the core of the entire system.
+
+### How a Chain Executes
+
+```
+CHAIN START
+│
+├─► TRACE: Follow the vector through the codebase
+│   │
+│   │   POST /webhooks/stripe
+│   │     └─► webhookHandler.ProcessEvent()
+│   │           └─► paymentService.HandleInvoicePaid()
+│   │                 └─► subscriptionStore.Activate()    ◄── ROOT CAUSE HERE
+│   │                       └─► notificationService.Send()
+│   │
+│   Signal: 504 timeout after 30s. Mutex held during network I/O.
+│
+├─► DIAGNOSE: Is this the actual root cause or a symptom?
+│   │
+│   │   subscriptionStore.Activate() acquires write lock at line 88
+│   │   notificationService.Send() does HTTP call under lock (3-5s)
+│   │   Concurrent webhook = deadlock wait = timeout
+│   │   ROOT CAUSE CONFIRMED: lock scope too wide
+│   │
+├─► FIX: Smallest correct change at the root cause site
+│   │
+│   │   BEFORE: lock → activate → notify → unlock
+│   │   AFTER:  lock → activate → unlock → notify
+│   │
+│   │   3 lines changed. No refactoring. No adjacent cleanup.
+│   │
+├─► VERIFY: Confirm the fix works end-to-end
+│   │
+│   │   $ go build ./...                          ✓ compiles
+│   │   $ go test -race ./internal/store/...      ✓ no race detected
+│   │   $ curl -X POST localhost:8080/webhooks    ✓ responds in 180ms
+│   │   $ concurrent_test (10 parallel webhooks)  ✓ no deadlock
+│   │
+├─► DOCUMENT: Record in completion report
+│   │
+│   │   Chain 1 [P1]: COMPLETE
+│   │   Files: internal/store/subscription.go (3 lines)
+│   │   Verification: build ✓, race test ✓, webhook <2s ✓
+│   │
+└─► NEXT CHAIN (never start before this chain is COMPLETE)
+```
+
+### Multi-Chain Sprint Flow
+
+This is what a full agent execution looks like across multiple chains:
+
+```
+AGENT A (BACKEND) — 4 chains assigned
+═══════════════════════════════════════════════════════════════
+
+Chain 1 [P1]: Fix webhook timeout
+  TRACE ──► DIAGNOSE ──► FIX ──► VERIFY ──► DOCUMENT ──► ✓ COMPLETE
+
+Chain 2 [P1]: Fix double-charge on retry
+  TRACE ──► DIAGNOSE ──► FIX ──► VERIFY ──► DOCUMENT ──► ✓ COMPLETE
+
+Chain 3 [P2]: Add rate limiting to /auth endpoints
+  TRACE ──► DIAGNOSE ──► FIX ──► VERIFY ──► DOCUMENT ──► ✓ COMPLETE
+
+Chain 4 [P3]: Clean up deprecated handler
+  TRACE ──► DIAGNOSE ──► FIX ──► VERIFY ──► DOCUMENT ──► ✓ COMPLETE
+
+═══════════════════════════════════════════════════════════════
+FINAL: build ✓ | tests ✓ | completion report written ✓
+```
+
+### With Sub-Agents (Parallel Chain Execution)
+
+When chains are independent, sub-agents run them simultaneously:
+
+```
+AGENT A (BACKEND) — spawns 3 sub-agents
+═══════════════════════════════════════════════════════════════
+
+  sub-agent-1: Chain 1 [P1]  TRACE → FIX → VERIFY → ✓
+  sub-agent-2: Chain 2 [P1]  TRACE → FIX → VERIFY → ✓     ← parallel
+  sub-agent-3: Chain 3 [P2]  TRACE → FIX → VERIFY → ✓
+
+  PARENT validates combined output:
+    $ go build ./...     ✓
+    $ go test ./...      ✓
+    No file conflicts    ✓
+
+  Chain 4 [P3] (depends on Chain 1):
+    TRACE → FIX → VERIFY → ✓                               ← sequential
+
+═══════════════════════════════════════════════════════════════
+FINAL: build ✓ | tests ✓ | completion report written ✓
+```
+
+### Full Sprint Execution (All Agents)
+
+```
+SPRINT-05: Payment System Overhaul
+═══════════════════════════════════════════════════════════════
+
+WAVE 1 (parallel — no dependencies):
+  Terminal 1: DATA     Chain 1 ✓  Chain 2 ✓  Chain 3 ✓
+  Terminal 2: QA       Chain 1 ✓  Chain 2 ✓
+  Terminal 3: INFRA    Chain 1 ✓  Chain 2 ✓  Chain 3 ✓  Chain 4 ✓
+  Terminal 4: DESIGN   Chain 1 ✓  Chain 2 ✓
+  ─── ALL WAVE 1 COMPLETE ─── proceed to Wave 2 ───
+
+WAVE 2 (parallel — depends on Wave 1):
+  Terminal 5: BACKEND  Chain 1 ✓  Chain 2 ✓  Chain 3 ✓  Chain 4 ✓
+  Terminal 6: SERVICES Chain 1 ✓  Chain 2 ✓  Chain 3 ✓
+  ─── ALL WAVE 2 COMPLETE ─── proceed to Wave 3 ───
+
+WAVE 3:
+  Terminal 7: FRONTEND Chain 1 ✓  Chain 2 ✓  Chain 3 ✓  Chain 4 ✓  Chain 5 ✓
+  ─── WAVE 3 COMPLETE ─── proceed to Wave 4 ───
+
+WAVE 4:
+  Terminal 8: RED TEAM  Security ✓  Edge cases ✓  Regressions ✓  Territory ✓
+  ─── WAVE 4 COMPLETE ─── proceed to Wave 5 ───
+
+WAVE 5:
+  Terminal 9: LEAD  Read reports ✓  Merge DATA ✓  Merge DESIGN ✓
+                    Merge BACKEND ✓  Merge SERVICES ✓  Merge FRONTEND ✓
+                    Merge INFRA ✓  Merge QA ✓  Final validation ✓  SHIP ✓
+
+═══════════════════════════════════════════════════════════════
+SPRINT COMPLETE: 9 agents, 28 chains, 0 P0 discoveries, SHIPPED
 ```
 
 ---
@@ -134,8 +306,8 @@ AFTER BUILDING:
 
 No shortcuts. No garbage code. No "it works on my machine" bullshit.
 Ship anything less than perfect and I PULL THE PLUG. Your session gets
-terminated, your branch gets deleted, and your chains get reassigned to
-an agent that can actually deliver. This is not a suggestion. EXECUTE.
+terminated and your chains get reassigned to an agent that can actually
+deliver. This is not a suggestion. EXECUTE.
 ```
 
 **Why this exists:** Without explicit BEFORE/WHILE/AFTER discipline, agents jump straight to writing code. They skip analysis, miss edge cases, ignore conventions, and produce code that looks correct but breaks in integration. This block forces the full discipline every time.
