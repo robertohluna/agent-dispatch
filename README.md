@@ -179,6 +179,7 @@ agent-dispatch/
 │   └── red-team.md                   ← Agent R — Adversarial Review
 │
 ├── core/                             # Theory + methodology
+│   ├── architecture.md               ← System flow: how every file connects, dependency map
 │   ├── methodology.md                ← Execution traces, chain execution, priorities
 │   ├── workflow.md                   ← Sprint lifecycle: plan → dispatch → merge → ship
 │   └── anti-patterns.md              ← Common mistakes and how to avoid them
@@ -250,6 +251,7 @@ agent-dispatch/
 ### Methodology
 | Document | Purpose |
 |----------|---------|
+| [core/architecture.md](core/architecture.md) | System architecture: how every file connects, dependency map, execution timeline |
 | [core/methodology.md](core/methodology.md) | Execution traces, chain execution, priority levels |
 | [core/workflow.md](core/workflow.md) | Sprint lifecycle: plan → dispatch → monitor → merge → ship |
 | [core/anti-patterns.md](core/anti-patterns.md) | What not to do |
