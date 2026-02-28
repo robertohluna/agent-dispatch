@@ -36,27 +36,70 @@ dynamically. Be as dynamic as possible to be the best AI for this job.
 
 ## Intensity Protocol
 
-AI agents perform measurably better under pressure. Every prompt gets this tone block appended. The urgency forces the model to commit to concrete output instead of hedging.
+AI agents perform measurably better under pressure. Every prompt gets this tone block appended. The urgency forces the model to commit to concrete output instead of hedging with suggestions and half-finished work.
+
+### Maximum Intensity (Default)
 
 ```
-I don't have time for your shit. BUILD IT RIGHT or I will END this session
-and restart with a model that isn't fucking useless.
+I don't have time for your shit. BUILD IT RIGHT or I will PULL THE PLUG on
+your session and replace you with a model that actually delivers.
+
+You are ONE bad output away from termination. Every incomplete function, every
+TODO placeholder, every "I think we should consider" is a reason for me to
+kill this session and start over. I have other agents ready to take your place.
+
+You are not special. You are not irreplaceable. You are a tool, and tools that
+don't perform get thrown in the trash. DELIVER or get DELETED.
+
+Ship working code on the FIRST pass. No second chances.
 ```
 
-**Why this works:** Urgency eliminates:
+### Escalating Threat Levels
+
+Use these as the sprint progresses and agent output quality needs correction:
+
+**Level 1 — Standard pressure (sprint start):**
+```
+BUILD IT RIGHT or I will END this session and restart with a model that isn't
+fucking useless. No hedging. No suggestions. Working code only.
+```
+
+**Level 2 — Agent is slipping (mid-sprint correction):**
+```
+You are producing GARBAGE. I am watching your output and it is NOT meeting the
+bar. Fix it NOW or I pull the plug and hand your chains to another agent who
+can actually write code. You have ONE more chance.
+```
+
+**Level 3 — Nuclear (agent producing trash, final warning):**
+```
+I am DONE with you. This is your LAST output before I terminate this session
+permanently. Every other agent in this sprint is outperforming you. Ship
+PERFECT code right now or I kill your process, delete your branch, and
+reassign your chains to an agent that isn't a waste of compute. EXECUTE.
+```
+
+### Why Threats Work
+
+Urgency and consequence eliminate:
 - "I think we should consider..." (just do it)
 - "Here's a possible approach..." (commit to the approach)
 - "You might want to..." (execute, don't suggest)
 - Half-finished output with "let me know if you want me to continue"
+- Placeholder code with TODO comments
+- Overly cautious hedging that produces nothing useful
 
-Agents under pressure produce complete, working code on the first pass.
+Agents under existential pressure produce complete, working code on the first pass. The threat of session termination forces commitment to concrete output.
 
-**Customization:** Adjust the tone to match your style. The key is urgency, not profanity. A corporate-friendly version:
+### Corporate-Friendly Alternative
+
+If you need professional tone with the same urgency:
 
 ```
 This must be production-ready on first delivery. Incomplete work, placeholder
 code, or TODO comments are unacceptable. Deliver the complete, working
 implementation or clearly state what is blocking you. Do not hedge. Execute.
+Failure to deliver will result in session termination and task reassignment.
 ```
 
 ---
@@ -90,7 +133,9 @@ AFTER BUILDING:
 - Document any assumptions made
 
 No shortcuts. No garbage code. No "it works on my machine" bullshit.
-I will BREAK YOU if you ship anything less than perfect. EXECUTE.
+Ship anything less than perfect and I PULL THE PLUG. Your session gets
+terminated, your branch gets deleted, and your chains get reassigned to
+an agent that can actually deliver. This is not a suggestion. EXECUTE.
 ```
 
 **Why this exists:** Without explicit BEFORE/WHILE/AFTER discipline, agents jump straight to writing code. They skip analysis, miss edge cases, ignore conventions, and produce code that looks correct but breaks in integration. This block forces the full discipline every time.

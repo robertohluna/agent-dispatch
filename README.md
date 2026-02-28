@@ -182,7 +182,7 @@ agent-dispatch/
 │   ├── architecture.md               ← System flow: how every file connects, dependency map
 │   ├── methodology.md                ← Execution traces, chain execution, priorities
 │   ├── workflow.md                   ← Sprint lifecycle: plan → dispatch → merge → ship
-│   └── anti-patterns.md              ← Common mistakes and how to avoid them
+│   └── anti-patterns.md             ← Common mistakes and how to avoid them
 │
 ├── guides/                           # How-to guides
 │   ├── agent-briefing.md             ← AI-facing system overview (READ THIS FIRST if you're an agent)
