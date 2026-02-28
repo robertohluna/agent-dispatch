@@ -161,6 +161,11 @@ agent-dispatch/
 ├── README.md                         ← You are here
 ├── LICENSE
 │
+├── config/                           # Dispatch configuration
+│   ├── README.md                     ← What goes in config
+│   ├── dispatch-styles.md            ← Execution style: intensity, mesh triggers, optimal path
+│   └── code-standards.md             ← Agent coding discipline: minimal, correct, no over-engineering
+│
 ├── agents/                           # Agent role definitions (one per file)
 │   ├── README.md                     ← Roster overview, wave structure, merge order
 │   ├── backend.md                    ← Agent A — Backend Logic
@@ -179,6 +184,8 @@ agent-dispatch/
 │   └── anti-patterns.md              ← Common mistakes and how to avoid them
 │
 ├── guides/                           # How-to guides
+│   ├── agent-briefing.md             ← AI-facing system overview (READ THIS FIRST if you're an agent)
+│   ├── parallel-execution.md         ← Scaling model: terminals × sub-agents = 100+ agents
 │   ├── sprint-planner.md             ← AI onboarding: codebase → sprint plan (START HERE)
 │   ├── quickstart.md                 ← 5-minute overview
 │   ├── operators-guide.md            ← Full operator tutorial
@@ -221,6 +228,7 @@ agent-dispatch/
 ### Start Here
 | Document | What You Get |
 |----------|-------------|
+| [guides/agent-briefing.md](guides/agent-briefing.md) | **AI agents: read this first.** What the system is, what you're about to do, how you fit in. |
 | [guides/sprint-planner.md](guides/sprint-planner.md) | Hand this to your AI. It reads your codebase and proposes a sprint. |
 | [guides/quickstart.md](guides/quickstart.md) | 5-minute overview of the system |
 | [guides/operators-guide.md](guides/operators-guide.md) | Full tutorial — planning, dispatch, monitoring, merge, ship |
@@ -270,9 +278,17 @@ agent-dispatch/
 | [templates/red-team-findings.md](templates/red-team-findings.md) | RED TEAM adversarial findings |
 | [templates/retrospective.md](templates/retrospective.md) | Sprint retrospective |
 
+### Config
+| Document | Purpose |
+|----------|---------|
+| [config/dispatch-styles.md](config/dispatch-styles.md) | Execution style: mesh triggers, intensity protocol, optimal path, prompt assembly order |
+| [config/code-standards.md](config/code-standards.md) | Agent coding discipline: minimal correct code, no over-engineering, conflict prevention |
+
 ### Guides
 | Document | Purpose |
 |----------|---------|
+| [guides/agent-briefing.md](guides/agent-briefing.md) | AI-facing system overview — what this is, what you're doing, how you fit in |
+| [guides/parallel-execution.md](guides/parallel-execution.md) | Scaling model: terminals × sub-agents, 30-100+ parallel agents |
 | [guides/customization.md](guides/customization.md) | Adapt territories for your stack |
 | [guides/tool-guide.md](guides/tool-guide.md) | AI agent comparison, setup, configuration |
 | [guides/legacy-codebases.md](guides/legacy-codebases.md) | Legacy code: archaeology, characterization tests |
