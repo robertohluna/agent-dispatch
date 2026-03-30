@@ -20,38 +20,34 @@ The dispatcher (your main AI session or orchestrator) does steps 1-4. You review
 
 ---
 
-## Step 1: The Dispatcher Prompt
+## Step 1: The ORCHESTRATOR Prompt
 
-This is the meta-prompt you paste into your main AI to kick off the entire sprint. The dispatcher reads the codebase, follows the Sprint Planner methodology, identifies work, writes execution traces, and generates everything.
+This is the meta-prompt you paste into your main AI to activate the ORCHESTRATOR and kick off the entire sprint. The ORCHESTRATOR follows a single playbook with hard checkpoints — no cross-referencing multiple docs.
+
+**Use the full prompt from [templates/dispatcher-prompt.md](dispatcher-prompt.md).** Short version:
 
 ```
-You are the Sprint Dispatcher for [PROJECT].
+You are the ORCHESTRATOR (Agent O) for [PROJECT].
 
-Read the following context files in order:
-1. docs/agent-dispatch/guides/sprint-planner.md — YOUR METHODOLOGY (follow this step by step)
-2. [PROJECT_CONTEXT_FILE] (project overview — architecture, patterns, commands)
-3. [PROGRESS_TRACKER] (what's done, what's next, known bugs)
-4. docs/agent-dispatch/agents/README.md (agent roles, territories, wave structure)
-5. docs/agent-dispatch/templates/activation.md (prompt structure and rules)
-6. docs/agent-dispatch/templates/agent.md (per-agent task doc structure)
-7. docs/agent-dispatch/templates/dispatch.md (DISPATCH.md structure)
+YOUR PLAYBOOK — read this and follow it step by step, checkpoint by checkpoint:
+  docs/agent-dispatch/guides/orchestrator-playbook.md
 
-SPRINT GOAL: [describe what this sprint should accomplish — bugs to fix, features to build,
-migrations to complete, debt to address]
+Read these additional context files:
+  1. [PROJECT_CONTEXT_FILE] — project overview, architecture, build commands
+  2. [PROGRESS_TRACKER] — what's done, what's next, known bugs
+  3. docs/agent-dispatch/config/dispatch-styles.md — style blocks for prompts
+  4. docs/agent-dispatch/config/code-standards.md — coding discipline for agents
 
-Follow the Sprint Planner guide exactly:
-  Phase 1: Analyze the codebase (architecture, layers, conventions)
-  Phase 2: Map territories (which agent owns which files)
-  Phase 3: Discover work (bugs, debt, security gaps, missing tests, features)
-  Phase 4: Write execution traces (entry point → root cause for each)
-  Phase 5: Propose sprint (agents, waves, chains, success criteria)
-  Phase 6: Generate docs (DISPATCH.md + per-agent task docs + activation prompts)
+SPRINT GOAL: [what you want to accomplish]
 
-Present the proposal first. Wait for my approval before generating the full documents.
-Scale the agent count to the work. Don't dispatch 10 agents for a 3-chain sprint.
+Follow the playbook PHASE BY PHASE. Do not skip phases. Do not proceed past
+a CHECKPOINT until its conditions are met. Do not generate documents until
+I approve the proposal.
+
+Start with Phase 1: Read the codebase.
 ```
 
-The dispatcher analyzes the codebase, proposes a plan, then generates all docs after approval. See [guides/sprint-planner.md](../guides/sprint-planner.md) for the full methodology the dispatcher follows.
+The ORCHESTRATOR reads the codebase, follows the playbook, produces a proposal, then generates all docs after your approval. The playbook has checkpoints that prevent skipping steps.
 
 ---
 
@@ -461,7 +457,7 @@ DATA-SPECIFIC:
 
 ---
 
-### LEAD — Orchestrator (Merge, Docs, Sprint Close)
+### LEAD — Merge Authority (Merge, Docs, Sprint Close)
 
 ```
 YOUR DOMAIN: Merge management, cross-agent integration validation, documentation, ship decision.

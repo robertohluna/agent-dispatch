@@ -2,17 +2,25 @@
 
 > Run through this before pasting activation prompts into terminals.
 > Every item must be YES before you dispatch.
+> This is GATE 1 (Pre-Dispatch) from `runtime/pipeline-gates.md`.
 
 ---
 
 ## Before Dispatching
 
+### ORCHESTRATOR Output
+- [ ] `sprint-XX/codebase-analysis.md` exists (Phase 1 output)
+- [ ] `sprint-XX/DISPATCH.md` exists and is complete (Phase 6 output)
+- [ ] Per-agent task docs exist for every dispatched agent (Phase 7 output)
+- [ ] Activation prompts exist for every dispatched agent (Phase 8 output)
+
 ### Sprint Plan
 - [ ] DISPATCH.md reviewed and approved
-- [ ] Agent count matches the work (not dispatching 9 agents for 3 chains)
+- [ ] Agent count matches the work (not dispatching 10 agents for 3 chains)
 - [ ] Wave assignments make sense (dependencies respected)
 - [ ] Merge order defined
 - [ ] Success criteria clear and measurable
+- [ ] Carry-forward items from previous sprint addressed (check REGISTRY.md)
 
 ### Agent Docs
 - [ ] Per-agent task doc exists for every dispatched agent
@@ -59,28 +67,35 @@ done
 ## Dispatch Order
 
 ```
-1. Paste Wave 1 prompts (DATA, QA, INFRA, DESIGN)     → agents start working
-2. Monitor Wave 1 progress                              → update status board
-3. ALL Wave 1 agents report COMPLETE                    → verify completion docs
-4. Paste Wave 2 prompts (BACKEND, SERVICES)             → agents start working
-5. Monitor Wave 2 progress                              → update status board
-6. ALL Wave 2 agents report COMPLETE                    → verify completion docs
-7. Paste Wave 3 prompt (FRONTEND)                       → agent starts working
-8. Wave 3 COMPLETE                                      → verify completion doc
-9. Paste Wave 4 prompt (RED TEAM)                       → adversarial review
-10. Wave 4 COMPLETE                                     → review findings
-11. Paste Wave 5 prompt (LEAD)                          → merge + ship
-12. SPRINT COMPLETE                                     → cleanup worktrees
+ 0. ORCHESTRATOR Wave 0 complete                         → all docs generated (GATE 1)
+ 1. Paste Wave 1 prompts (DATA, QA, INFRA, DESIGN)      → agents start working
+ 2. Monitor Wave 1 progress                              → update status board
+ 3. ALL Wave 1 agents report COMPLETE                    → verify completion docs (GATE 2)
+ 4. Paste Wave 2 prompts (BACKEND, SERVICES)             → agents start working
+ 5. Monitor Wave 2 progress                              → update status board
+ 6. ALL Wave 2 agents report COMPLETE                    → verify completion docs (GATE 2)
+ 7. Paste Wave 3 prompt (FRONTEND)                       → agent starts working
+ 8. Wave 3 COMPLETE                                      → verify completion doc (GATE 2)
+ 9. Paste Wave 4 prompt (RED TEAM)                       → adversarial review
+10. Wave 4 COMPLETE                                      → review findings (GATE 4)
+11. Paste Wave 5 prompt (LEAD)                           → merge + ship
+12. ORCHESTRATOR Wave 6                                  → grade agents, produce assessment
+13. SPRINT COMPLETE                                      → run post-sprint-checklist.md (GATE 5)
 ```
 
 ---
 
 ## After Sprint
 
+See [post-sprint-checklist.md](post-sprint-checklist.md) for the full teardown process.
+
+Quick version:
 - [ ] All completion reports collected
 - [ ] RED TEAM findings reviewed — blocking issues resolved
+- [ ] ORCHESTRATOR graded agents — `sprint-XX/SPRINT-ASSESSMENT.md` exists
 - [ ] LEAD merged all branches in dependency order
 - [ ] Build + test passed after every merge
 - [ ] Sprint summary written
+- [ ] Carry-forward items extracted and added to `sprints/REGISTRY.md`
 - [ ] Worktrees cleaned up: `git worktree remove ...`
 - [ ] Sprint branches cleaned up: `git branch -d ...`

@@ -430,9 +430,11 @@ agent-dispatch/
 │   └── anti-patterns.md             ← Common mistakes and how to avoid them
 │
 ├── guides/                           # How-to guides
+│   ├── orchestrator-playbook.md      ← THE PLAYBOOK — single doc ORCHESTRATOR follows
+│   ├── carry-forward-protocol.md     ← How deferred work bridges sprints
 │   ├── agent-briefing.md             ← AI-facing system overview (READ THIS FIRST if you're an agent)
 │   ├── parallel-execution.md         ← Scaling model: terminals × sub-agents = 100+ agents
-│   ├── sprint-planner.md             ← AI onboarding: codebase → sprint plan (START HERE)
+│   ├── sprint-planner.md             ← AI onboarding: codebase → sprint plan
 │   ├── quickstart.md                 ← 5-minute overview
 │   ├── operators-guide.md            ← Full operator tutorial
 │   ├── customization.md              ← Adapt territories for your stack
@@ -441,6 +443,7 @@ agent-dispatch/
 │   └── dispatch-config.md            ← Machine-readable config for automation
 │
 ├── runtime/                          # Runtime operations (while agents are working)
+│   ├── pipeline-gates.md             ← 6 hard gates: plan → dispatch → waves → merge → close
 │   ├── reactions.md                  ← 12 decision trees for in-sprint events
 │   ├── status-tracking.md            ← Agent states, chain progress, health indicators
 │   └── interventions.md              ← 24 copy-paste correction messages
@@ -450,8 +453,11 @@ agent-dispatch/
 │   └── multi-repo.md                 ← Multi-repository coordination
 │
 ├── templates/                        # Copy-paste templates
-│   ├── dispatcher-prompt.md          ← THE PROMPT — copy-paste to kick off a sprint
+│   ├── dispatcher-prompt.md          ← ORCHESTRATOR activation prompt
+│   ├── sprint-assessment.md          ← ORCHESTRATOR grading output template
+│   ├── sprint-registry.md            ← Sprint index + carry-forward tracker
 │   ├── preflight-checklist.md        ← Pre-dispatch verification checklist
+│   ├── post-sprint-checklist.md      ← Post-sprint teardown + carry-forward
 │   ├── project-claude-md.md          ← CLAUDE.md template for your project
 │   ├── dispatch.md                   ← Sprint dispatch plan
 │   ├── agent.md                      ← Per-agent task document
@@ -514,6 +520,8 @@ agent-dispatch/
 ### Guides
 | Document | Purpose |
 |----------|---------|
+| [guides/orchestrator-playbook.md](guides/orchestrator-playbook.md) | **THE PLAYBOOK** — single doc ORCHESTRATOR follows, phase by phase, with hard checkpoints |
+| [guides/carry-forward-protocol.md](guides/carry-forward-protocol.md) | How deferred work bridges sprints — extraction, classification, escalation |
 | [guides/parallel-execution.md](guides/parallel-execution.md) | Scaling model: terminals × sub-agents, 30-100+ parallel agents |
 | [guides/customization.md](guides/customization.md) | Adapt territories for your stack |
 | [guides/tool-guide.md](guides/tool-guide.md) | AI agent comparison, setup, configuration |
@@ -523,6 +531,7 @@ agent-dispatch/
 ### Runtime Operations
 | Document | Purpose |
 |----------|---------|
+| [runtime/pipeline-gates.md](runtime/pipeline-gates.md) | **6 hard gates** — plan approval, pre-dispatch, wave transition, agent completion, merge readiness, sprint close |
 | [runtime/reactions.md](runtime/reactions.md) | 12 decision trees for in-sprint events |
 | [runtime/status-tracking.md](runtime/status-tracking.md) | Agent states, chain progress, sprint health |
 | [runtime/interventions.md](runtime/interventions.md) | 24 copy-paste correction messages |
@@ -537,7 +546,10 @@ agent-dispatch/
 | Template | Use For |
 |----------|---------|
 | [templates/dispatcher-prompt.md](templates/dispatcher-prompt.md) | **ORCHESTRATOR activation prompt** — copy-paste to kick off a sprint |
+| [templates/sprint-assessment.md](templates/sprint-assessment.md) | ORCHESTRATOR's grading output — per-agent grades, mission result, carry-forward |
+| [templates/sprint-registry.md](templates/sprint-registry.md) | Sprint index — history, carry-forward tracker, agent performance across sprints |
 | [templates/preflight-checklist.md](templates/preflight-checklist.md) | Pre-dispatch checklist — verify everything before pasting prompts |
+| [templates/post-sprint-checklist.md](templates/post-sprint-checklist.md) | Post-sprint teardown — validation, carry-forward, cleanup, release |
 | [templates/project-claude-md.md](templates/project-claude-md.md) | CLAUDE.md template for wiring Agent Dispatch into your project |
 | [templates/dispatch.md](templates/dispatch.md) | Sprint plan |
 | [templates/agent.md](templates/agent.md) | Per-agent task doc with implementation specs |

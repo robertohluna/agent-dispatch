@@ -177,35 +177,43 @@ Every file in the repo has exactly one job.
 
 | File | Read By | Job |
 |------|---------|-----|
+| `guides/orchestrator-playbook.md` | ORCHESTRATOR | **THE PLAYBOOK** — single sequential doc with hard checkpoints |
+| `guides/carry-forward-protocol.md` | ORCHESTRATOR | How deferred work bridges sprints |
 | `guides/agent-briefing.md` | Any AI first encountering this system | "What is this. What do I do." |
-| `guides/sprint-planner.md` | Dispatcher | 6-phase methodology for analyzing codebase → sprint plan |
+| `guides/sprint-planner.md` | ORCHESTRATOR | 6-phase methodology for analyzing codebase → sprint plan |
 | `guides/parallel-execution.md` | Operator | Terminal scaling model, sub-agent math |
 | `guides/operators-guide.md` | Operator | Full tutorial, start to finish |
 | `guides/quickstart.md` | Operator | 5-minute version |
-| `guides/customization.md` | Dispatcher + operator | Adapt territories per stack |
+| `guides/customization.md` | ORCHESTRATOR + operator | Adapt territories per stack |
 | `guides/tool-guide.md` | Operator | AI tool comparison + setup |
-| `guides/legacy-codebases.md` | Dispatcher | How to handle codebases with no tests/docs |
+| `guides/legacy-codebases.md` | ORCHESTRATOR | How to handle codebases with no tests/docs |
 | `guides/dispatch-config.md` | Automation scripts | Machine-readable YAML config |
 
 ### Templates — Copy-Paste Starting Points
 
 | File | Produces | Job |
 |------|----------|-----|
+| `templates/dispatcher-prompt.md` | ORCHESTRATOR activation | Meta-prompt to kick off sprint |
 | `templates/dispatch.md` | `sprint-XX/DISPATCH.md` | Sprint plan structure |
 | `templates/agent.md` | `sprint-XX/agent-X-*.md` | Per-agent task doc structure |
 | `templates/activation.md` | Activation prompts | Prompt structure + dispatch pipeline |
 | `templates/completion.md` | `agent-X-completion.md` | Agent completion report structure |
+| `templates/sprint-assessment.md` | `SPRINT-ASSESSMENT.md` | ORCHESTRATOR grading output |
+| `templates/sprint-registry.md` | `REGISTRY.md` | Sprint index + carry-forward tracker |
 | `templates/status.md` | Status board | Sprint tracking during execution |
 | `templates/red-team-findings.md` | RED TEAM report | Adversarial findings format |
+| `templates/preflight-checklist.md` | Pre-dispatch gate | Verify before pasting prompts |
+| `templates/post-sprint-checklist.md` | Post-sprint gate | Teardown + carry-forward |
 | `templates/retrospective.md` | Sprint retro | Post-sprint review |
 
 ### Runtime — While Agents Work
 
 | File | Read By | Job |
 |------|---------|-----|
-| `runtime/status-tracking.md` | Operator | Agent states, health indicators |
-| `runtime/reactions.md` | Operator | 12 decision trees for runtime events |
-| `runtime/interventions.md` | Operator | 24 copy-paste correction messages |
+| `runtime/pipeline-gates.md` | ORCHESTRATOR + operator | 6 hard gates: plan → dispatch → waves → merge → close |
+| `runtime/status-tracking.md` | ORCHESTRATOR + operator | Agent states, health indicators |
+| `runtime/reactions.md` | ORCHESTRATOR + operator | 12 decision trees for runtime events |
+| `runtime/interventions.md` | ORCHESTRATOR + operator | 24 copy-paste correction messages |
 
 ### Scaling — Beyond 10 Agents
 
