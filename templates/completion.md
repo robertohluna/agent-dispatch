@@ -72,8 +72,30 @@
 
 ### [X]-03: [Title] — PARKED
 
-**Reason:** [Why this task was not completed — dependency, blocker, time, discovered larger scope]
+**Reason:** [Why this task was not completed — dependency, blocker, time, retry exhaustion]
+**Retry history:** [How many retries were attempted and what was tried]
 **Recommended next step:** [What the next agent or sprint should do]
+
+---
+
+## Parked Chains (Retry Exhaustion)
+
+Chains that failed after 3 retry attempts. This section feeds the convergence loop.
+
+### [X]-04: [Title] — PARKED (3 retries exhausted)
+
+**Attempt 1:** [What was tried] → Failed: [error summary]
+**Attempt 2:** [Different approach tried] → Failed: [error summary]
+**Attempt 3:** [Fresh approach tried] → Failed: [error summary]
+
+**Failure analysis:**
+[Why does this keep failing? Best hypothesis for the root cause.
+Is the trace wrong? Is the root cause somewhere else? Is there a dependency
+that wasn't accounted for? This information helps the convergence loop
+plan a better approach for the next iteration.]
+
+**What would I try differently:**
+[If given another chance with more context, what approach would you try?]
 
 ---
 

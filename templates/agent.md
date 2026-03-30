@@ -162,9 +162,28 @@ Which tasks to do in what order. Tasks within a wave can run in parallel.
 
 ---
 
-## Verification Checklist
+## Per-Chain Verification
 
-Run these after completing all tasks. Every check must pass before writing your completion report.
+**Run build + test after EVERY chain, not just at the end.**
+
+```bash
+cd [WORKING_DIRECTORY]
+
+# After EACH chain:
+[exact build command]
+[exact test command]
+
+# If EITHER fails:
+#   1. Fix the issue (Retry 1: fix the specific error)
+#   2. If still failing: rethink your approach (Retry 2: try different angle)
+#   3. If still failing: start fresh (Retry 3: ignore previous work)
+#   4. If still failing after 3 retries: PARK the chain, move to next
+#      Document what was tried in your completion report under "PARKED CHAINS"
+```
+
+## Final Verification Checklist
+
+Run these after completing all chains. Should already pass if per-chain verification passed.
 
 ```bash
 cd [WORKING_DIRECTORY]

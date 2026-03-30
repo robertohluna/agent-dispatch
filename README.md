@@ -53,7 +53,13 @@ PLAN → DISPATCH → EXECUTE → MONITOR → MERGE → GRADE → SHIP
    Grades each agent on: completeness, correctness, mission alignment, territory, conventions
    Produces SPRINT-ASSESSMENT.md with per-agent grades and carry-forward work
 
-7. SHIP
+7. CONVERGE (if gaps remain)
+   If PARTIALLY ACHIEVED: ORCHESTRATOR re-analyzes gaps, writes new traces
+   Generates mini-sprint targeting only failed/parked chains
+   Re-dispatches affected agents with different approaches
+   Max 3 iterations → then carry-forward to next sprint
+
+8. SHIP
    Tag release. Delete worktrees. Done.
 ```
 
@@ -444,6 +450,7 @@ agent-dispatch/
 │
 ├── runtime/                          # Runtime operations (while agents are working)
 │   ├── pipeline-gates.md             ← 6 hard gates: plan → dispatch → waves → merge → close
+│   ├── retry-protocol.md            ← Escalating retries: 3-tier fix with broadening context
 │   ├── reactions.md                  ← 12 decision trees for in-sprint events
 │   ├── status-tracking.md            ← Agent states, chain progress, health indicators
 │   └── interventions.md              ← 24 copy-paste correction messages
@@ -532,6 +539,7 @@ agent-dispatch/
 | Document | Purpose |
 |----------|---------|
 | [runtime/pipeline-gates.md](runtime/pipeline-gates.md) | **6 hard gates** — plan approval, pre-dispatch, wave transition, agent completion, merge readiness, sprint close |
+| [runtime/retry-protocol.md](runtime/retry-protocol.md) | **Escalating retries** — 3-tier fix attempts with broadening context, per-chain verification |
 | [runtime/reactions.md](runtime/reactions.md) | 12 decision trees for in-sprint events |
 | [runtime/status-tracking.md](runtime/status-tracking.md) | Agent states, chain progress, sprint health |
 | [runtime/interventions.md](runtime/interventions.md) | 24 copy-paste correction messages |

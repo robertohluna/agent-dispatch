@@ -219,24 +219,54 @@ RECEIVE task doc with prioritized chains
   │   └─ Change only what's necessary
   │   └─ If fix requires touching another agent's territory → PARK, document
   │
-  ├─ VERIFY: Confirm the fix
-  │   └─ Build passes
-  │   └─ Existing tests pass
-  │   └─ New test covers the fix (if QA territory, note for QA)
-  │   └─ Reverse-trace: does the original signal now succeed?
+  ├─ VERIFY IMMEDIATELY: Build + test after THIS chain (not at the end)
+  │   │
+  │   ├─ PASS → chain COMPLETE, commit, move to next chain
+  │   │
+  │   └─ FAIL → enter RETRY PROTOCOL:
+  │       │
+  │       ├─ Retry 1: Fix the specific error (narrow context)
+  │       │   └─ PASS → commit, next chain
+  │       │   └─ FAIL ↓
+  │       ├─ Retry 2: Rethink approach (broader context, different angle)
+  │       │   └─ PASS → commit, next chain
+  │       │   └─ FAIL ↓
+  │       └─ Retry 3: Fresh start (all accumulated errors, clean slate)
+  │           └─ PASS → commit, next chain
+  │           └─ FAIL → PARK chain, document failure, move on
   │
   ├─ DOCUMENT: Record in completion report
   │   └─ What changed, why, which files, line counts
   │   └─ Any P0 discoveries (critical escalation)
   │   └─ Any blockers for other agents
+  │   └─ Any PARKED chains with failure analysis
   │
   └─ NEXT chain
   │
-  WHEN ALL chains complete:
-  ├─ Final build + test
-  ├─ Write completion report
+  WHEN ALL chains complete (or parked):
+  ├─ Final build + test (should already pass if per-chain verification passed)
+  ├─ Write completion report (include parked chains with failure analysis)
   └─ Commit and signal done
 ```
+
+### Per-Chain Verification
+
+**Verify after EVERY chain, not just at the end.** Run build + test immediately after each chain completes. This catches failures early — a break in chain 2 of 5 is caught and fixed (or parked) before chain 3 starts building on broken code.
+
+### Escalating Retry Protocol
+
+When verification fails, don't just retry the same approach. Use escalating retries with progressively broader context:
+
+| Retry | Context | Approach |
+|-------|---------|----------|
+| **Retry 1** | Error output only | Fix the specific bug in the implementation |
+| **Retry 2** | All errors + adjacent code | Rethink the approach entirely — try a different angle |
+| **Retry 3** | All accumulated context + codebase patterns | Start fresh, ignore previous work, maximum context |
+| **PARK** | — | Document failure analysis, move to next chain |
+
+After 3 failed retries, PARK the chain. Do not spend more time. Document what was tried and why it failed — this feeds into the convergence loop for the next iteration.
+
+See [retry-protocol.md](../runtime/retry-protocol.md) for the full protocol with message templates.
 
 ---
 

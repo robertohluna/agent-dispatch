@@ -211,6 +211,7 @@ Every file in the repo has exactly one job.
 | File | Read By | Job |
 |------|---------|-----|
 | `runtime/pipeline-gates.md` | ORCHESTRATOR + operator | 6 hard gates: plan → dispatch → waves → merge → close |
+| `runtime/retry-protocol.md` | Agents + ORCHESTRATOR | Escalating 3-tier retries with per-chain verification |
 | `runtime/status-tracking.md` | ORCHESTRATOR + operator | Agent states, health indicators |
 | `runtime/reactions.md` | ORCHESTRATOR + operator | 12 decision trees for runtime events |
 | `runtime/interventions.md` | ORCHESTRATOR + operator | 24 copy-paste correction messages |

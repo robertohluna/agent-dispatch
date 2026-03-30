@@ -75,6 +75,36 @@ docs/agent-dispatch/sprint-*/codebase-analysis.md   # Codebase analysis snapshot
 
 14. **Handoff to LEAD** — Provide LEAD with the graded assessment and a recommended merge order. Flag any agents whose branches should NOT be merged (FAIL grade or RED TEAM CRITICAL findings).
 
+### Phase 3: Convergence (If Mission Not Fully Achieved)
+
+15. **Convergence Decision** — If the sprint assessment is PARTIALLY ACHIEVED or NOT ACHIEVED, decide whether to run another iteration:
+    - Are there PARKED chains that failed after 3 retries?
+    - Are there carry-forward items that could be addressed immediately?
+    - Is the gap small enough to close with a targeted follow-up?
+
+16. **Iteration Planning** — If converging, generate a follow-up mini-sprint:
+    - Re-analyze only the gaps (not the entire codebase)
+    - Write new execution traces informed by failure analysis from the previous iteration
+    - Reassign chains to different agents or different approaches
+    - Generate new task docs for affected agents only
+    - Do NOT re-dispatch agents whose work was graded PASS
+
+17. **Convergence Loop** — Repeat the cycle: dispatch → execute → grade → converge. Maximum 3 iterations per sprint to prevent infinite loops.
+
+```
+Iteration 1: Full sprint → PARTIALLY ACHIEVED (2 chains parked)
+  │
+  ORCHESTRATOR re-analyzes gaps, writes new traces
+  │
+Iteration 2: Mini-sprint targeting gaps → PARTIALLY ACHIEVED (1 chain still failing)
+  │
+  ORCHESTRATOR re-analyzes, considers different approach
+  │
+Iteration 3: Final attempt → ACHIEVED or carry-forward to next sprint
+```
+
+After 3 iterations, carry remaining gaps to the next sprint regardless of status. Do not loop forever.
+
 ## Does NOT Touch
 
 Application source code — read-only. Does not write code, fix bugs, or modify any source files. ORCHESTRATOR plans, monitors, and grades. Agents build.

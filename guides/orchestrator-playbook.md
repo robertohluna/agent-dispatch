@@ -786,6 +786,128 @@ Full assessment: sprint-XX/SPRINT-ASSESSMENT.md
 
 ---
 
+## CONVERGENCE LOOP — Auto-Iterate on Gaps
+
+If the sprint assessment is **PARTIALLY ACHIEVED** or **NOT ACHIEVED**, the ORCHESTRATOR can run additional iterations to close the gaps — without the operator manually planning a new sprint.
+
+### When to Converge
+
+| Assessment Result | Action |
+|-------------------|--------|
+| ACHIEVED | Done. No convergence needed. |
+| PARTIALLY ACHIEVED (minor gaps) | Converge — run iteration 2 targeting gaps |
+| PARTIALLY ACHIEVED (major gaps) | Ask operator — converge or carry to next sprint? |
+| NOT ACHIEVED | Ask operator — converge, restart, or abandon? |
+
+### Phase 12: Gap Analysis (Iteration N+1)
+
+**Do NOT re-analyze the entire codebase.** Only analyze what failed:
+
+1. Read the SPRINT-ASSESSMENT.md from the previous iteration
+2. Read completion reports for agents with PARTIAL or FAIL grades
+3. Read PARKED chain failure analysis (what was tried, why it failed)
+4. Read RED TEAM findings that were not resolved
+
+**Extract gaps:**
+- Chains that were PARKED after 3 retries → need new traces with different approach
+- Chains that were never started (agent ran out of time) → same traces, new assignment
+- RED TEAM CRITICAL/HIGH findings → new fix chains
+- Success criteria that didn't pass → root cause analysis
+
+### Phase 13: Write New Traces
+
+For each gap, write a NEW execution trace informed by what was learned:
+
+```
+Chain: [Same title] — ITERATION 2
+Priority: P1 (escalated from previous iteration)
+
+Previous attempts:
+  Approach 1: [what was tried] → Failed because [why]
+  Approach 2: [what was tried] → Failed because [why]
+
+New vector: [entry point] → [DIFFERENT path through codebase] → [root cause]
+
+Signal: [Same signal as before — the bug is still there]
+
+Fix: [DIFFERENT fix approach based on failure analysis.
+  If the previous approach tried X, try Y instead.
+  Consider: was the root cause misidentified?
+  Consider: is there a simpler fix that was overlooked?]
+
+Verify: [Same verification — the acceptance criteria don't change]
+```
+
+**Key rule:** If the same approach failed twice, the trace MUST propose a different approach. Do not retry the same thing.
+
+### Phase 14: Generate Iteration Documents
+
+Generate ONLY what's needed for the gaps:
+
+```
+sprint-XX/
+├── DISPATCH-ITER2.md                    ← Iteration 2 plan (gaps only)
+├── agent-[X]-[domain]-iter2.md (×N)     ← New task docs for affected agents only
+└── [activation prompts for affected agents only]
+```
+
+**Scale down:** If iteration 1 had 6 agents and only 2 had gaps, iteration 2 dispatches only those 2 agents.
+
+### Phase 15: Present Convergence Plan
+
+```
+ORCHESTRATOR: Sprint [XX] Iteration 1 result: PARTIALLY ACHIEVED.
+
+Gaps identified:
+- [N] chains PARKED after retry exhaustion
+- [N] RED TEAM findings unresolved
+- [N] success criteria not met
+
+Convergence plan:
+- Dispatch [N] agents targeting [N] gaps
+- New traces with different approaches based on failure analysis
+- Estimated effort: [lower than iteration 1]
+
+Approve iteration 2?
+```
+
+**Wait for operator approval before dispatching iteration 2.**
+
+### ► CHECKPOINT 8: Convergence Approved
+
+Operator approved convergence iteration → dispatch affected agents.
+
+### Iteration Limits
+
+```
+Maximum iterations: 3 per sprint
+  Iteration 1: Full sprint (all chains)
+  Iteration 2: Gaps only (parked chains + unresolved findings)
+  Iteration 3: Final attempt on remaining gaps
+
+After iteration 3: carry ALL remaining gaps to next sprint.
+Do not loop forever.
+```
+
+### Convergence Metrics
+
+Track across iterations:
+
+```
+Iteration 1: 20 chains assigned, 18 completed, 2 parked → 90% coverage
+Iteration 2:  2 chains assigned,  1 completed, 1 parked → 95% coverage
+Iteration 3:  1 chain  assigned,  1 completed, 0 parked → 100% coverage
+CONVERGED after 3 iterations.
+```
+
+Record in SPRINT-ASSESSMENT.md:
+- Number of iterations needed
+- Chains resolved per iteration
+- Final coverage
+- Whether convergence was achieved or gaps carried forward
+
+---
+
 ## COMPLETE FILE INVENTORY
 
 When ORCHESTRATOR is done, these files MUST exist in `sprint-XX/`:
@@ -820,3 +942,4 @@ Missing file = incomplete sprint. No exceptions.
 | 6 | Activation Prompts | All prompts ready | [prompts or `DISPATCH-PROMPTS.md`] |
 | GATE | Pre-Dispatch | All files exist, all checks pass | → DISPATCH |
 | 7 | Sprint Assessment | Assessment complete | `SPRINT-ASSESSMENT.md` |
+| 8 | Convergence (if needed) | Operator approved iteration N+1 | `DISPATCH-ITERX.md` + gap task docs |

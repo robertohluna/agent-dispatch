@@ -193,6 +193,19 @@ AFTER CODING — every chain ends here:
   2. Validate: Test the failure modes you identified. Every one of them.
   3. Confirm: Would you ship this right now? If not, you're not done.
 
+PER-CHAIN VERIFICATION:
+  After completing EACH chain (not just all chains), run:
+    [build command]
+    [test command]
+  If EITHER fails, fix the issue before moving to the next chain.
+  A chain is not complete until verification passes.
+  Do not accumulate broken chains — fix as you go.
+
+  If a chain fails verification 3 times despite different approaches:
+  PARK it. Document what was tried and why it failed in your completion
+  report under "PARKED CHAINS". Move to the next chain immediately.
+  Do not spend unlimited time on a single failing chain.
+
 CRITICAL ESCALATION:
   If you discover a critical issue NOT in your task list (data corruption, security
   vulnerability, race condition, broken auth) — STOP. Document it in your completion

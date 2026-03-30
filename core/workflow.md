@@ -100,6 +100,24 @@ After LEAD completes all merges:
 3. ORCHESTRATOR produces `SPRINT-ASSESSMENT.md` with per-agent grades, mission result, carry-forward work
 4. ORCHESTRATOR recommends what to do next sprint based on what was learned
 
+### 8. Convergence Loop (If Gaps Remain)
+
+If the sprint is PARTIALLY ACHIEVED (parked chains, unresolved findings):
+
+1. ORCHESTRATOR re-analyzes only the gaps (not the entire codebase)
+2. ORCHESTRATOR writes new execution traces with DIFFERENT approaches (informed by failure analysis)
+3. ORCHESTRATOR generates mini-sprint docs targeting only the gaps
+4. Operator approves → dispatch affected agents only
+5. Grade → assess → converge again if needed (max 3 iterations)
+
+```
+Iteration 1: Full sprint    → 90% coverage (2 chains parked)
+Iteration 2: Gaps only      → 95% coverage (1 chain still failing)
+Iteration 3: Final attempt  → 100% coverage or carry-forward
+```
+
+See [orchestrator-playbook.md](../guides/orchestrator-playbook.md) for the full convergence protocol.
+
 ## Territory Rules
 
 Each agent has a defined territory (directories they own):
@@ -122,14 +140,14 @@ Each agent produces a completion report containing:
 ## Sprint Lifecycle
 
 ```
-PLAN → DISPATCH → EXECUTE → MONITOR → MERGE → VALIDATE → GRADE → SHIP
-  │        │          │         │         │        │         │       │
-  │        │          │         │         │        │         │       └─ Tag release
-  │        │          │         │         │        │         └─ ORCHESTRATOR grades agents
-  │        │          │         │         │        └─ Full test suite
+PLAN → DISPATCH → EXECUTE → MONITOR → MERGE → GRADE → CONVERGE? → SHIP
+  │        │          │         │         │       │        │          │
+  │        │          │         │         │       │        │          └─ Tag release
+  │        │          │         │         │       │        └─ If gaps: re-plan + re-dispatch
+  │        │          │         │         │       └─ ORCHESTRATOR grades agents
   │        │          │         │         └─ LEAD merges sequentially
   │        │          │         └─ ORCHESTRATOR monitors, intervenes
-  │        │          └─ Agents work in parallel (waves)
+  │        │          └─ Agents verify after EACH chain (retry up to 3×)
   │        └─ Create worktrees + paste prompts
   └─ ORCHESTRATOR analyzes codebase, generates sprint plan
 ```
