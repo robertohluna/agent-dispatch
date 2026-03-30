@@ -33,6 +33,10 @@ Signal: [observable evidence]
 
 > Each agent's focus should reference the chain(s) above it is resolving.
 
+### Wave 0 — Planning (ORCHESTRATOR)
+
+ORCHESTRATOR analyzes the codebase, writes execution traces, and generates this dispatch plan + all agent task docs.
+
 ### Wave 1 — Foundation (no dependencies)
 
 | Agent | Focus | Est. Complexity |
@@ -55,17 +59,29 @@ Signal: [observable evidence]
 |-------|-------|-----------------|
 | FRONTEND | [Frontend tasks] | [1-10] |
 
-### Wave 4 — Ship (depends on all)
+### Wave 4 — Review (needs finished code)
+
+| Agent | Focus | Est. Complexity |
+|-------|-------|-----------------|
+| RED TEAM | [Adversarial review of all branches] | [1-10] |
+
+### Wave 5 — Ship (depends on all)
 
 | Agent | Focus | Est. Complexity |
 |-------|-------|-----------------|
 | LEAD | [Merge + docs] | [1-10] |
 
+### Wave 6 — Assessment (ORCHESTRATOR)
+
+ORCHESTRATOR grades each agent against the sprint mission, produces SPRINT-ASSESSMENT.md.
+
 ## Merge Order
 
 > Run merge validation (build + test) after EVERY merge before proceeding.
+> ORCHESTRATOR does not merge — it plans (Wave 0) and grades (Wave 6).
 
 ```
+0. ORCHESTRATOR — plans sprint (Wave 0), grades agents (Wave 6) — no merge
 1. DATA → main
 2. DESIGN   → main
 3. BACKEND   → main
@@ -73,7 +89,8 @@ Signal: [observable evidence]
 5. FRONTEND   → main
 6. INFRA → main
 7. QA    → main
-8. LEAD    → main
+8. RED TEAM — does not merge; produces findings report
+9. LEAD    → main
 ```
 
 ## Success Criteria

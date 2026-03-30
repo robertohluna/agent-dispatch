@@ -7,27 +7,27 @@
 ## The Flow
 
 ```
-OPERATOR                    DISPATCHER (AI)                 AGENTS (AI × N)
+OPERATOR                    ORCHESTRATOR (Agent O)           AGENTS (AI × N)
    │                             │                               │
    │  "Fix auth bugs,            │                               │
    │   add rate limiting"        │                               │
    │ ───────────────────────►    │                               │
    │                             │                               │
-   │                        ┌────┴────────────────┐              │
-   │                        │ READS:              │              │
-   │                        │ 1. sprint-planner.md│              │
-   │                        │ 2. Your codebase    │              │
-   │                        │ 3. agents/README.md │              │
-   │                        │ 4. dispatch-styles  │              │
-   │                        │ 5. code-standards   │              │
-   │                        └────┬────────────────┘              │
+   │                  ┌──────────┴──────────────┐                │
+   │                  │ WAVE 0 — PLANNING:      │                │
+   │                  │ 1. Reads codebase       │                │
+   │                  │ 2. Analyzes architecture │                │
+   │                  │ 3. Discovers work        │                │
+   │                  │ 4. Writes exec traces    │                │
+   │                  │ 5. Maps territories      │                │
+   │                  └──────────┬──────────────┘                │
    │                             │                               │
-   │                        ┌────┴────────────────┐              │
-   │                        │ PRODUCES:           │              │
-   │                        │ • DISPATCH.md       │              │
-   │                        │ • agent-X-*.md (×N) │              │
-   │                        │ • activation prompts│              │
-   │                        └────┬────────────────┘              │
+   │                  ┌──────────┴──────────────┐                │
+   │                  │ PRODUCES:               │                │
+   │                  │ • DISPATCH.md           │                │
+   │                  │ • agent-X-*.md (×N)     │                │
+   │                  │ • activation prompts    │                │
+   │                  └──────────┬──────────────┘                │
    │                             │                               │
    │  Reviews proposal           │                               │
    │ ◄───────────────────────────│                               │
@@ -38,12 +38,12 @@ OPERATOR                    DISPATCHER (AI)                 AGENTS (AI × N)
    │  Opens terminals            │                               │
    │  Pastes prompts ──────────────────────────────────────►     │
    │                             │                          ┌────┴──────┐
-   │                             │                          │ Each agent│
-   │                             │                          │ works on  │
-   │                             │                          │ its branch│
-   │                             │                          │ in its    │
-   │                             │                          │ territory │
-   │  Monitors progress ◄──────────────────────────────────│           │
+   │                             │  WAVES 1-3:              │ Each agent│
+   │                             │  Monitors progress,      │ works on  │
+   │                             │  intervenes when         │ its branch│
+   │                             │  agents drift            │ in its    │
+   │                             │  off-mission             │ territory │
+   │                             │ ◄────────────────────────│           │
    │                             │                          │ Produces: │
    │                             │                          │ • Code    │
    │                             │                          │ • Tests   │
@@ -51,8 +51,19 @@ OPERATOR                    DISPATCHER (AI)                 AGENTS (AI × N)
    │                             │                          │   ion doc │
    │                             │                          └────┬──────┘
    │                             │                               │
-   │  LEAD merges in order       │                               │
-   │  Build+test after each      │                               │
+   │                  ┌──────────┴──────────────┐                │
+   │                  │ WAVE 4: RED TEAM reviews │                │
+   │                  │ WAVE 5: LEAD merges      │                │
+   │                  └──────────┬──────────────┘                │
+   │                             │                               │
+   │                  ┌──────────┴──────────────┐                │
+   │                  │ WAVE 6 — ASSESSMENT:    │                │
+   │                  │ • Grades each agent     │                │
+   │                  │ • Mission alignment     │                │
+   │                  │ • SPRINT-ASSESSMENT.md  │                │
+   │                  │ • Carry-forward work    │                │
+   │                  └──────────┬──────────────┘                │
+   │                             │                               │
    │  Ship ✓                     │                               │
 ```
 
@@ -71,60 +82,65 @@ What reads what. Follow the arrows.
                                  │
                                  ▼
                    ┌─────────────────────────┐
-                   │  guides/sprint-planner   │ ◄── The dispatcher's methodology
+                   │  ORCHESTRATOR (Agent O)  │ ◄── agents/orchestrator.md
+                   │  reads:                  │
+                   │  • guides/sprint-planner │
+                   │  • agents/README         │
+                   │  • config/dispatch-styles│
+                   │  • config/code-standards │
+                   │  • Your codebase         │
                    └─────────────┬───────────┘
-                                 │ reads
+                                 │ produces (Wave 0)
             ┌────────────────────┼────────────────────┐
             ▼                    ▼                     ▼
    ┌────────────────┐  ┌────────────────┐   ┌────────────────┐
-   │ agents/README  │  │ config/dispatch │   │ config/code    │
-   │ (roles, waves, │  │ -styles        │   │ -standards     │
-   │  merge order)  │  │ (tone, quality │   │ (how agents    │
-   │                │  │  protocol)     │   │  write code)   │
+   │ DISPATCH.md    │  │ agent-X-*.md   │   │ activation     │
+   │ (sprint plan,  │  │ (per-agent     │   │ prompts        │
+   │  waves, merge  │  │  task docs)    │   │ (copy-paste    │
+   │  order)        │  │                │   │  into terminals│
    └───────┬────────┘  └───────┬────────┘   └───────┬────────┘
            │                   │                     │
-           │         ┌────────┘                     │
-           ▼         ▼                               │
-   ┌───────────────────────┐                        │
-   │ DISPATCHER PRODUCES:  │                        │
-   │                       │                        │
-   │ sprint-XX/DISPATCH.md │ ◄── templates/dispatch │
-   │ sprint-XX/agent-X-*.md│ ◄── templates/agent    │
-   │ activation prompts    │ ◄── templates/activation│
-   └───────────┬───────────┘                        │
-               │ pasted into terminals               │
-               ▼                                     │
-   ┌───────────────────────┐                        │
-   │ EACH AGENT READS:     │                        │
-   │                       │                        │
-   │ 1. Project context    │                        │
-   │ 2. Its task doc       │                        │
-   │ 3. code-standards ◄───┼────────────────────────┘
-   │ 4. Source files       │
-   │ 5. Its activation     │
-   │    prompt (inline)    │
-   └───────────┬───────────┘
-               │ works, then produces
-               ▼
-   ┌───────────────────────┐
-   │ AGENT PRODUCES:       │
-   │                       │
-   │ • Code changes        │
-   │ • agent-X-completion  │ ◄── templates/completion
-   │   .md                 │
-   └───────────┬───────────┘
-               │ read by RED TEAM + LEAD
-               ▼
-   ┌───────────────────────┐
-   │ MERGE + SHIP          │
-   │                       │
-   │ LEAD reads:           │
-   │ • All completion docs │
-   │ • RED TEAM findings   │ ◄── templates/red-team-findings
-   │ • Merges in order     │
-   │ • Build+test each     │
-   │ • Ships or blocks     │
-   └───────────────────────┘
+           └───────────────────┼─────────────────────┘
+                               │ pasted into terminals
+                               ▼
+                   ┌───────────────────────┐
+                   │ EACH AGENT READS:     │
+                   │                       │
+                   │ 1. Project context    │
+                   │ 2. Its task doc       │
+                   │ 3. code-standards     │
+                   │ 4. Source files       │
+                   │ 5. Its activation     │
+                   │    prompt (inline)    │
+                   └───────────┬───────────┘
+                               │ works, then produces
+                               ▼
+                   ┌───────────────────────┐
+                   │ AGENT PRODUCES:       │
+                   │                       │
+                   │ • Code changes        │
+                   │ • agent-X-completion  │ ◄── templates/completion
+                   │   .md                 │
+                   └───────────┬───────────┘
+                               │ read by RED TEAM, ORCHESTRATOR, LEAD
+                               ▼
+                   ┌───────────────────────┐
+                   │ MERGE + ASSESS        │
+                   │                       │
+                   │ ORCHESTRATOR reads:    │
+                   │ • All completion docs  │
+                   │ • RED TEAM findings    │
+                   │ • Grades each agent    │
+                   │ • Produces SPRINT-     │
+                   │   ASSESSMENT.md        │
+                   │                       │
+                   │ LEAD reads:            │
+                   │ • ORCHESTRATOR grade   │
+                   │ • RED TEAM findings    │ ◄── templates/red-team-findings
+                   │ • Merges in order      │
+                   │ • Build+test each      │
+                   │ • Ships or blocks      │
+                   └───────────────────────┘
 ```
 
 ---
@@ -153,8 +169,9 @@ Every file in the repo has exactly one job.
 
 | File | Read By | Job |
 |------|---------|-----|
-| `agents/README.md` | Dispatcher | Roster, waves, merge order |
-| `agents/[role].md` | Dispatcher + that agent | Territory, responsibilities, merge position |
+| `agents/README.md` | ORCHESTRATOR | Roster, waves, merge order |
+| `agents/orchestrator.md` | ORCHESTRATOR | Sprint command: planning, monitoring, grading |
+| `agents/[role].md` | ORCHESTRATOR + that agent | Territory, responsibilities, merge position |
 
 ### Guides — How-To
 
@@ -190,7 +207,7 @@ Every file in the repo has exactly one job.
 | `runtime/reactions.md` | Operator | 12 decision trees for runtime events |
 | `runtime/interventions.md` | Operator | 24 copy-paste correction messages |
 
-### Scaling — Beyond 9 Agents
+### Scaling — Beyond 10 Agents
 
 | File | Read By | Job |
 |------|---------|-----|
@@ -219,10 +236,11 @@ docs/agent-dispatch/sprints/
 ├── sprint-01/
 ├── sprint-02/
 └── sprint-03/
-    ├── DISPATCH.md                  # Sprint plan (generated by dispatcher)
+    ├── DISPATCH.md                  # Sprint plan (generated by ORCHESTRATOR)
+    ├── codebase-analysis.md         # Codebase snapshot (generated by ORCHESTRATOR)
     ├── DISPATCH-PROMPTS.md          # All activation prompts (archive)
     │
-    ├── agent-A-backend.md           # Task docs (generated by dispatcher)
+    ├── agent-A-backend.md           # Task docs (generated by ORCHESTRATOR)
     ├── agent-B-frontend.md
     ├── agent-C-infra.md
     ├── agent-D-services.md
@@ -240,7 +258,8 @@ docs/agent-dispatch/sprints/
     │
     ├── red-team-findings.md         # RED TEAM adversarial report
     ├── SECURITY-REVIEW.md           # Security review (if applicable)
-    └── SPRINT-SUMMARY.md            # LEAD's final summary + ship decision
+    ├── SPRINT-SUMMARY.md            # LEAD's final summary + ship decision
+    └── SPRINT-ASSESSMENT.md         # ORCHESTRATOR's grading + mission assessment
 ```
 
 ---
@@ -248,18 +267,18 @@ docs/agent-dispatch/sprints/
 ## Execution Timeline
 
 ```
-TIME ──────────────────────────────────────────────────────────────►
+TIME ──────────────────────────────────────────────────────────────────────────►
 
-PLAN           WAVE 1              WAVE 2           WAVE 3      WAVE 4    WAVE 5
-│              │                   │                │           │         │
-│ Dispatcher   │ DATA ████████░    │ BACKEND ██████ │ FRONTEND  │ RED     │ LEAD
-│ analyzes     │ QA   ████████░    │ SERVICES █████ │ ████████░ │ TEAM    │ merges
-│ codebase,    │ INFRA ███████░    │                │           │ ██████░ │ ships
-│ proposes     │ DESIGN ██████░    │                │           │         │
-│ sprint       │                   │                │           │         │
-│              │ All Wave 1 done   │ All Wave 2     │ Wave 3    │ Review  │ Done
-│              │ before Wave 2     │ done before    │ done      │ done    │
-│              │ starts            │ Wave 3 starts  │           │         │
+WAVE 0         WAVE 1              WAVE 2           WAVE 3      WAVE 4    WAVE 5    WAVE 6
+│              │                   │                │           │         │         │
+│ ORCHESTRATOR │ DATA ████████░    │ BACKEND ██████ │ FRONTEND  │ RED     │ LEAD    │ ORCHESTRATOR
+│ analyzes     │ QA   ████████░    │ SERVICES █████ │ ████████░ │ TEAM    │ merges  │ grades
+│ codebase,    │ INFRA ███████░    │                │           │ ██████░ │ ships   │ assesses
+│ generates    │ DESIGN ██████░    │                │           │         │         │ closes
+│ all docs     │                   │                │           │         │         │ sprint
+│              │ All Wave 1 done   │ All Wave 2     │ Wave 3    │ Review  │ Merged  │
+│              │ before Wave 2     │ done before    │ done      │ done    │         │ Done
+│              │ starts            │ Wave 3 starts  │           │         │         │
 ```
 
 Each `████` block = one terminal with one agent + its sub-agents running in parallel.
@@ -273,13 +292,14 @@ Each `████` block = one terminal with one agent + its sub-agents running
 3. `core/architecture.md` — This file. How everything connects.
 4. `guides/operators-guide.md` — Full tutorial (when ready to run a sprint)
 
-## Reading Order for AI Dispatchers
+## Reading Order for ORCHESTRATOR
 
-1. `guides/sprint-planner.md` — Your methodology
-2. `agents/README.md` — Roles, waves, merge order
-3. `config/dispatch-styles.md` — Style blocks for prompts
-4. `config/code-standards.md` — How agents write code
-5. `templates/` — All templates for generating docs
+1. `agents/orchestrator.md` — Your role, grading rubric, assessment template
+2. `guides/sprint-planner.md` — 6-phase planning methodology
+3. `agents/README.md` — Roles, waves, merge order
+4. `config/dispatch-styles.md` — Style blocks for prompts
+5. `config/code-standards.md` — How agents write code
+6. `templates/` — All templates for generating docs
 
 ## Reading Order for Activated Agents
 

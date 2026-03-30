@@ -18,16 +18,16 @@ Agent Dispatch coordinates multiple AI coding agents working simultaneously on a
 ## How It Works
 
 ```
-PLAN → DISPATCH → EXECUTE → MONITOR → MERGE → SHIP
+PLAN → DISPATCH → EXECUTE → MONITOR → MERGE → GRADE → SHIP
 
-1. PLAN
+1. PLAN (ORCHESTRATOR — Wave 0)
    You: "Fix the auth bugs, add rate limiting, close the security findings"
-   AI reads: sprint-planner.md + your codebase
-   AI produces: sprint proposal (agents, waves, chains, success criteria)
+   ORCHESTRATOR reads: sprint-planner.md + your codebase
+   ORCHESTRATOR produces: sprint proposal (agents, waves, chains, success criteria)
    You: approve / adjust
 
 2. DISPATCH
-   AI generates: DISPATCH.md + per-agent task docs + activation prompts
+   ORCHESTRATOR generates: DISPATCH.md + per-agent task docs + activation prompts
    You run: git worktree setup (one isolated branch per agent)
    You paste: activation prompts into separate agent terminals
 
@@ -39,16 +39,21 @@ PLAN → DISPATCH → EXECUTE → MONITOR → MERGE → SHIP
    Wave 5: LEAD                           → merge + ship
 
 4. MONITOR
-   Track agent status, chain progress, sprint health
-   React to events (CI fails, stuck agents, territory violations)
-   Intervene with correction messages when needed
+   ORCHESTRATOR tracks agent status, chain progress, sprint health
+   Reacts to events (CI fails, stuck agents, territory violations)
+   Intervenes with correction messages when agents drift off-mission
 
 5. MERGE
    RED TEAM reviews all branches for security/edge cases (can BLOCK merge)
    LEAD merges branches in dependency order: DATA → DESIGN → BACKEND → ...
    Build + test after EVERY merge. No exceptions.
 
-6. SHIP
+6. GRADE (ORCHESTRATOR — Wave 6)
+   ORCHESTRATOR reads all completion reports + RED TEAM findings
+   Grades each agent on: completeness, correctness, mission alignment, territory, conventions
+   Produces SPRINT-ASSESSMENT.md with per-agent grades and carry-forward work
+
+7. SHIP
    Tag release. Delete worktrees. Done.
 ```
 
@@ -160,7 +165,7 @@ See [guides/parallel-execution.md](guides/parallel-execution.md) for the full sc
 
 ## What a Completed Sprint Looks Like
 
-After all agents finish and LEAD merges, your sprint directory looks like this:
+After all agents finish, LEAD merges, and ORCHESTRATOR grades, your sprint directory looks like this:
 
 ```
 docs/agent-dispatch/sprints/
@@ -186,7 +191,8 @@ docs/agent-dispatch/sprints/
 │   ├── GOLF-COMPLETION.md
 │   │
 │   ├── SECURITY-REVIEW.md           # RED TEAM security findings
-│   └── SPRINT-SUMMARY.md            # LEAD's final summary + ship decision
+│   ├── SPRINT-SUMMARY.md            # LEAD's final summary + ship decision
+│   └── SPRINT-ASSESSMENT.md         # ORCHESTRATOR's grading + mission assessment
 │
 ├── sprint-04/
 └── sprint-05/
@@ -285,10 +291,11 @@ The rule: write the **shortest correct code** that solves the problem while **ma
 
 ---
 
-## The 9 Agents
+## The 10 Agents
 
 | Code | Name | Domain | Wave |
 |------|------|--------|------|
+| O | **ORCHESTRATOR** | Sprint planning, dispatch, monitoring, grading | 0 + 6 |
 | F | **DATA** | Models, stores, migrations, queries | 1 |
 | E | **QA** | Tests, security audits, coverage | 1 |
 | C | **INFRA** | Docker, CI/CD, builds, deployment | 1 |
@@ -297,9 +304,9 @@ The rule: write the **shortest correct code** that solves the problem while **ma
 | D | **SERVICES** | Workers, integrations, external API clients | 2 |
 | B | **FRONTEND** | Components, routes, stores, hooks | 3 |
 | R | **RED TEAM** | Adversarial review — break other agents' work before merge | 4 |
-| G | **LEAD** | Merge, docs, ship decision | 5 |
+| G | **LEAD** | Merge authority, post-merge validation, ship decision | 5 |
 
-Scale to the work. A 3-chain bug fix needs 2 agents, not 9. A full-stack migration might need all of them. For 20-30+ agents, roles split into nested teams — see [scaling/scaling.md](scaling/scaling.md).
+ORCHESTRATOR is always present — it plans the sprint (Wave 0) and grades the output (Wave 6). Scale the coding agents to the work. A 3-chain bug fix needs ORCHESTRATOR + 2 agents, not 10. A full-stack migration might need all of them. For 20-30+ agents, roles split into nested teams — see [scaling/scaling.md](scaling/scaling.md).
 
 Each agent has its own file in [`agents/`](agents/) with territory definitions, responsibilities, wave placement, and merge order.
 
@@ -313,11 +320,13 @@ Each agent has its own file in [`agents/`](agents/) with territory definitions, 
 cp -r agent-dispatch/ your-project/docs/agent-dispatch/
 ```
 
-### 2. Plan your first sprint
+### 2. Activate the ORCHESTRATOR
 
-Give your AI this prompt:
+Give your AI the ORCHESTRATOR activation prompt from [templates/dispatcher-prompt.md](templates/dispatcher-prompt.md), or use the short version:
 
 ```
+You are the ORCHESTRATOR (Agent O) for [PROJECT].
+Read docs/agent-dispatch/agents/orchestrator.md — your role.
 Read docs/agent-dispatch/guides/sprint-planner.md — follow it step by step.
 Then read the codebase. Analyze the architecture, discover work, write execution
 traces, and propose a sprint plan.
@@ -325,16 +334,16 @@ traces, and propose a sprint plan.
 Sprint goal: [what you want to accomplish]
 ```
 
-The AI reads the Sprint Planner guide, analyzes your codebase, maps territories, discovers bugs/debt/security gaps, writes execution traces, and proposes a sprint with agents, waves, and success criteria. You review and approve.
+The ORCHESTRATOR reads the codebase, maps territories, discovers bugs/debt/security gaps, writes execution traces, and proposes a sprint with agents, waves, and success criteria. You review and approve.
 
 ### 3. Dispatch
 
-After approval, the AI generates:
+After approval, the ORCHESTRATOR generates:
 - `sprint-XX/DISPATCH.md` — the full sprint plan
 - `sprint-XX/agent-X-*.md` — per-agent task docs with exact implementation specs
 - Activation prompts — ready to paste into agent terminals
 
-Set up worktrees, paste prompts, agents start working.
+Set up worktrees, paste prompts, agents start working. After the sprint, reactivate ORCHESTRATOR for Wave 6 grading.
 
 ### 4. Run
 
@@ -347,6 +356,10 @@ Follow the [Operator's Guide](guides/operators-guide.md) for the full tutorial, 
 ```
 SPRINT-05: Payment System Overhaul
 ═══════════════════════════════════════════════════════════════
+
+WAVE 0 (planning):
+  ORCHESTRATOR: Analyze codebase ✓  Write traces ✓  Generate docs ✓
+  ─── WAVE 0 COMPLETE ─── dispatch agents ───
 
 WAVE 1 (parallel — no dependencies):
   Terminal 1: DATA     Chain 1 ✓  Chain 2 ✓  Chain 3 ✓
@@ -372,9 +385,15 @@ WAVE 5:
   Terminal 9: LEAD  Read reports ✓  Merge DATA ✓  Merge DESIGN ✓
                     Merge BACKEND ✓  Merge SERVICES ✓  Merge FRONTEND ✓
                     Merge INFRA ✓  Merge QA ✓  Final validation ✓  SHIP ✓
+  ─── WAVE 5 COMPLETE ─── proceed to Wave 6 ───
+
+WAVE 6 (assessment):
+  ORCHESTRATOR: Grade DATA ✓  Grade QA ✓  Grade INFRA ✓  Grade DESIGN ✓
+                Grade BACKEND ✓  Grade SERVICES ✓  Grade FRONTEND ✓
+                Mission: ACHIEVED ✓  SPRINT-ASSESSMENT.md ✓
 
 ═══════════════════════════════════════════════════════════════
-SPRINT COMPLETE: 9 agents, 28 chains, 0 P0 discoveries, SHIPPED
+SPRINT COMPLETE: 10 agents, 28 chains, 0 P0 discoveries, SHIPPED
 ```
 
 ---
@@ -393,13 +412,14 @@ agent-dispatch/
 │
 ├── agents/                           # Agent role definitions (one per file)
 │   ├── README.md                     ← Roster overview, wave structure, merge order
+│   ├── orchestrator.md               ← Agent O — Sprint Command (planning, monitoring, grading)
 │   ├── backend.md                    ← Agent A — Backend Logic
 │   ├── frontend.md                   ← Agent B — Frontend UI
 │   ├── infra.md                      ← Agent C — Infrastructure
 │   ├── services.md                   ← Agent D — Specialized Services
 │   ├── qa.md                         ← Agent E — QA / Security
 │   ├── data.md                       ← Agent F — Data Layer
-│   ├── lead.md                       ← Agent G — Orchestrator
+│   ├── lead.md                       ← Agent G — Merge Authority
 │   ├── design.md                     ← Agent H — Design & Creative
 │   └── red-team.md                   ← Agent R — Adversarial Review
 │
@@ -480,13 +500,14 @@ agent-dispatch/
 | Document | Role |
 |----------|------|
 | [agents/README.md](agents/README.md) | Roster overview, wave structure, merge order |
+| [agents/orchestrator.md](agents/orchestrator.md) | Agent O — Sprint Command (planning, monitoring, grading) |
 | [agents/backend.md](agents/backend.md) | Agent A — Backend Logic |
 | [agents/frontend.md](agents/frontend.md) | Agent B — Frontend UI |
 | [agents/infra.md](agents/infra.md) | Agent C — Infrastructure |
 | [agents/services.md](agents/services.md) | Agent D — Specialized Services |
 | [agents/qa.md](agents/qa.md) | Agent E — QA / Security |
 | [agents/data.md](agents/data.md) | Agent F — Data Layer |
-| [agents/lead.md](agents/lead.md) | Agent G — Orchestrator |
+| [agents/lead.md](agents/lead.md) | Agent G — Merge Authority |
 | [agents/design.md](agents/design.md) | Agent H — Design & Creative |
 | [agents/red-team.md](agents/red-team.md) | Agent R — Adversarial Review |
 
@@ -515,7 +536,7 @@ agent-dispatch/
 ### Templates
 | Template | Use For |
 |----------|---------|
-| [templates/dispatcher-prompt.md](templates/dispatcher-prompt.md) | **Copy-paste prompt** to kick off a sprint (gives AI the sprint goal) |
+| [templates/dispatcher-prompt.md](templates/dispatcher-prompt.md) | **ORCHESTRATOR activation prompt** — copy-paste to kick off a sprint |
 | [templates/preflight-checklist.md](templates/preflight-checklist.md) | Pre-dispatch checklist — verify everything before pasting prompts |
 | [templates/project-claude-md.md](templates/project-claude-md.md) | CLAUDE.md template for wiring Agent Dispatch into your project |
 | [templates/dispatch.md](templates/dispatch.md) | Sprint plan |

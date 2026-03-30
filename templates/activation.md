@@ -48,7 +48,7 @@ Follow the Sprint Planner guide exactly:
   Phase 6: Generate docs (DISPATCH.md + per-agent task docs + activation prompts)
 
 Present the proposal first. Wait for my approval before generating the full documents.
-Scale the agent count to the work. Don't dispatch 9 agents for a 3-chain sprint.
+Scale the agent count to the work. Don't dispatch 10 agents for a 3-chain sprint.
 ```
 
 The dispatcher analyzes the codebase, proposes a plan, then generates all docs after approval. See [guides/sprint-planner.md](../guides/sprint-planner.md) for the full methodology the dispatcher follows.

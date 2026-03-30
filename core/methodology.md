@@ -139,6 +139,8 @@ Commit what you have. Do not attempt to fix P0 issues outside your territory
 After agents complete their chains independently, their work meets during merge. The merge order isn't arbitrary — it follows the dependency graph of the codebase:
 
 ```
+ORCHESTRATOR (plans sprint, generates docs — Wave 0)
+    ↓ dispatches
 DATA (data layer)
     ↓ depends on
 DESIGN (design system/tokens)
@@ -152,8 +154,12 @@ FRONTEND (frontend — uses DESIGN specs + backend APIs)
 INFRA (infrastructure)
     ↓ validates
 QA (tests)
-    ↓ documents
-LEAD (ship)
+    ↓ reviews
+RED TEAM (adversarial review)
+    ↓ informs
+LEAD (merge + ship)
+    ↓ assessed by
+ORCHESTRATOR (grades agents, closes sprint — Wave 6)
 ```
 
 Each merge is a **merge validation point** — the moment two independent chains of work meet and must be validated together. This is where bugs hide. That's why you build + test after EVERY merge, not just at the end.

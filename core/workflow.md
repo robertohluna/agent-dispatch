@@ -11,12 +11,16 @@ Agents work using the **Execution Methodology** — they follow execution traces
 
 ## How It Works
 
-### 1. Sprint Planning
+### 1. Sprint Planning (ORCHESTRATOR — Wave 0)
 
-1. Read your progress tracker — identify goals
-2. Create `sprint-XX/DISPATCH.md` — wave assignments, merge order, success criteria
-3. Create `sprint-XX/agent-X-*.md` — per-agent task documents
-4. Use [activation.md](../templates/activation.md) to write copy-paste activation prompts
+1. Activate the ORCHESTRATOR agent with the sprint goal
+2. ORCHESTRATOR reads the codebase, analyzes architecture, discovers work
+3. ORCHESTRATOR writes execution traces for each piece of work
+4. ORCHESTRATOR proposes the sprint plan to the operator (wait for approval)
+5. After approval, ORCHESTRATOR generates:
+   - `sprint-XX/DISPATCH.md` — wave assignments, merge order, success criteria
+   - `sprint-XX/agent-X-*.md` — per-agent task documents
+   - Activation prompts per agent (following [activation.md](../templates/activation.md))
 
 ### 2. Worktree Setup
 
@@ -44,11 +48,13 @@ Agents dispatch in waves based on dependencies:
 
 | Wave | Agents | Rationale |
 |------|--------|-----------|
+| Wave 0 | ORCHESTRATOR | Sprint command: analyze codebase, create dispatch plan, generate all docs |
 | Wave 1 | DATA, QA, INFRA, DESIGN | Foundation: data layer, tests, infra, design specs (no code deps) |
 | Wave 2 | BACKEND, SERVICES | Backend: handlers + services (depend on stable data layer) |
 | Wave 3 | FRONTEND | Frontend (needs DESIGN design specs + stable backend API) |
 | Wave 4 | RED TEAM | Adversarial review of all agent branches (needs finished code to review) |
-| Wave 5 | LEAD | Orchestrator: merge, docs, ship (informed by RED TEAM findings) |
+| Wave 5 | LEAD | Merge authority: sequential merge, post-merge validation, ship decision |
+| Wave 6 | ORCHESTRATOR | Sprint close: grade agents against mission, produce sprint assessment |
 
 Customize wave assignments based on your specific dependencies.
 
@@ -81,9 +87,18 @@ After each merge, run your full validation suite:
 
 ### 6. Conflict Resolution
 
-- LEAD (orchestrator) handles all merge conflicts
+- LEAD (merge authority) handles all merge conflicts
 - Earlier agents in merge order win conflicts (DATA > DESIGN > BACKEND > SERVICES > etc.)
 - Non-trivial semantic conflicts get flagged for human review
+
+### 7. Sprint Assessment (ORCHESTRATOR — Wave 6)
+
+After LEAD completes all merges:
+
+1. ORCHESTRATOR reads every agent's completion report and branch diff
+2. ORCHESTRATOR grades each agent on: completeness, correctness, mission alignment, territory discipline, convention match
+3. ORCHESTRATOR produces `SPRINT-ASSESSMENT.md` with per-agent grades, mission result, carry-forward work
+4. ORCHESTRATOR recommends what to do next sprint based on what was learned
 
 ## Territory Rules
 
@@ -91,7 +106,7 @@ Each agent has a defined territory (directories they own):
 
 - Agents can **read** any file in the repo
 - Agents can **write** only to their territory
-- Cross-territory changes require orchestrator (LEAD) approval
+- Cross-territory changes require ORCHESTRATOR escalation or LEAD approval at merge
 - Shared files (package.json, go.mod, requirements.txt) coordinated by LEAD
 
 ## Completion Protocol
@@ -107,15 +122,16 @@ Each agent produces a completion report containing:
 ## Sprint Lifecycle
 
 ```
-PLAN → DISPATCH → EXECUTE → MONITOR → MERGE → VALIDATE → SHIP
-  │        │          │         │         │        │         │
-  │        │          │         │         │        │         └─ Tag release
+PLAN → DISPATCH → EXECUTE → MONITOR → MERGE → VALIDATE → GRADE → SHIP
+  │        │          │         │         │        │         │       │
+  │        │          │         │         │        │         │       └─ Tag release
+  │        │          │         │         │        │         └─ ORCHESTRATOR grades agents
   │        │          │         │         │        └─ Full test suite
-  │        │          │         │         └─ Sequential merge per order
-  │        │          │         └─ Track status, react to events, intervene
+  │        │          │         │         └─ LEAD merges sequentially
+  │        │          │         └─ ORCHESTRATOR monitors, intervenes
   │        │          └─ Agents work in parallel (waves)
   │        └─ Create worktrees + paste prompts
-  └─ Sprint planning from progress tracker
+  └─ ORCHESTRATOR analyzes codebase, generates sprint plan
 ```
 
 ### Runtime Monitoring

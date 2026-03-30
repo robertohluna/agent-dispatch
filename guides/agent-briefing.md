@@ -17,30 +17,43 @@ This document covers all three scenarios.
 
 ---
 
-## If You're Planning a Sprint
+## If You're the ORCHESTRATOR (Agent O)
 
-You are the **dispatcher**. Your job:
+You are the **ORCHESTRATOR** — the sprint command agent. You plan, monitor, and grade. Your job:
 
+**Wave 0 — Planning:**
 1. **Read** the project's codebase — understand architecture, patterns, conventions, tech stack
-2. **Read** `guides/sprint-planner.md` — this is your methodology, follow it step by step
-3. **Discover** work — bugs, technical debt, security gaps, missing tests, features to build
-4. **Write execution traces** — traced paths from entry point to root cause for each piece of work
-5. **Propose a sprint** — assign agents, organize into waves, define success criteria
-6. **Generate documents** after operator approval:
+2. **Read** `agents/orchestrator.md` — your role, grading rubric, assessment template
+3. **Read** `guides/sprint-planner.md` — this is your methodology, follow it step by step
+4. **Discover** work — bugs, technical debt, security gaps, missing tests, features to build
+5. **Write execution traces** — traced paths from entry point to root cause for each piece of work
+6. **Propose a sprint** — assign agents, organize into waves, define success criteria
+7. **Generate documents** after operator approval:
    - `DISPATCH.md` — the sprint plan
    - Per-agent task docs (`agent-X-[domain].md`) — exact implementation specs
    - Activation prompts — ready to paste into separate agent terminals
 
+**Waves 1-5 — Monitoring:**
+8. **Track** agent progress, chain completion, blockers
+9. **Intervene** when agents drift off-mission or violate territory
+10. **Escalate** P0 discoveries and cross-agent blockers to the operator
+
+**Wave 6 — Grading:**
+11. **Read** every agent's completion report and branch diff
+12. **Grade** each agent on: completeness, correctness, mission alignment, territory, conventions
+13. **Produce** `SPRINT-ASSESSMENT.md` with per-agent grades and carry-forward work
+
 **Key files to read:**
-- `guides/sprint-planner.md` — Your step-by-step methodology
-- `agents/README.md` — The 9 agent roles, wave structure, merge order
+- `agents/orchestrator.md` — Your role definition and grading rubric
+- `guides/sprint-planner.md` — Your step-by-step planning methodology
+- `agents/README.md` — The 10 agent roles, wave structure, merge order
 - `templates/activation.md` — How to structure activation prompts
 - `templates/dispatch.md` — Sprint plan template
 - `templates/agent.md` — Per-agent task doc template
 - `config/dispatch-styles.md` — Execution style blocks to append to every prompt
 - `config/code-standards.md` — Coding discipline every agent must follow
 
-**Critical:** Scale agents to the work. A 3-chain bug fix needs 2-3 agents, not 9. A full-stack migration might need all 9. Don't dispatch agents that don't have work.
+**Critical:** Scale agents to the work. A 3-chain bug fix needs ORCHESTRATOR + 2 agents, not 10. A full-stack migration might need all of them. Don't dispatch agents that don't have work.
 
 ---
 
@@ -96,12 +109,13 @@ Good: "POST /webhooks/stripe → webhookHandler.ProcessEvent() → paymentServic
 
 **Merge validation** catches breakage — build + test after every single merge.
 
-**Completion reports** enable trust — detailed reports let the orchestrator merge confidently.
+**Completion reports** enable trust — detailed reports let ORCHESTRATOR grade and LEAD merge confidently.
 
-### The 9 Agents
+### The 10 Agents
 
 | Agent | Domain | Wave | Merge Order |
 |-------|--------|------|-------------|
+| ORCHESTRATOR (O) | Sprint planning, monitoring, grading | 0 + 6 | Does not merge |
 | DATA (F) | Models, stores, migrations | 1 | 1st |
 | QA (E) | Tests, security audits | 1 | 7th |
 | INFRA (C) | Docker, CI/CD, deployment | 1 | 6th |
@@ -110,21 +124,22 @@ Good: "POST /webhooks/stripe → webhookHandler.ProcessEvent() → paymentServic
 | SERVICES (D) | Workers, integrations | 2 | 4th |
 | FRONTEND (B) | Components, routes, stores | 3 | 5th |
 | RED TEAM (R) | Adversarial review | 4 | Does not merge |
-| LEAD (G) | Merge, docs, ship | 5 | 8th (last) |
+| LEAD (G) | Merge authority, ship | 5 | 8th (last) |
 
 ### The Sprint Lifecycle
 
 ```
-PLAN → DISPATCH → EXECUTE → MONITOR → MERGE → SHIP
+PLAN → DISPATCH → EXECUTE → MONITOR → MERGE → GRADE → SHIP
 
-1. Dispatcher analyzes codebase, proposes sprint
+1. ORCHESTRATOR analyzes codebase, proposes sprint (Wave 0)
 2. Operator approves, sets up git worktrees (one branch per agent)
 3. Operator pastes activation prompts into separate agent terminals
-4. Agents work in parallel on isolated branches
+4. Agents work in parallel on isolated branches (Waves 1-3)
 5. Each agent produces a completion report
-6. RED TEAM reviews all branches for security/edge cases
-7. LEAD merges in dependency order, validates after each merge
-8. Ship
+6. RED TEAM reviews all branches for security/edge cases (Wave 4)
+7. LEAD merges in dependency order, validates after each merge (Wave 5)
+8. ORCHESTRATOR grades each agent against the mission, produces assessment (Wave 6)
+9. Ship
 ```
 
 ### The File Structure
@@ -132,7 +147,7 @@ PLAN → DISPATCH → EXECUTE → MONITOR → MERGE → SHIP
 ```
 agent-dispatch/
 ├── config/          # Dispatch styles, code standards, project overrides
-├── agents/          # 9 agent role definitions
+├── agents/          # 10 agent role definitions
 ├── core/            # Methodology, workflow, anti-patterns
 ├── guides/          # Sprint planner, operator's guide, quickstart, customization
 ├── runtime/         # Status tracking, reactions, interventions (while agents work)

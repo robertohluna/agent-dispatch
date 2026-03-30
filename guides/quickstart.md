@@ -19,17 +19,18 @@ You (Operator)
 
 ---
 
-## The 9 Agents
+## The 10 Agents
 
 | Code | Name    | What it does                                    |
 |------|---------|-------------------------------------------------|
+| O    | ORCHESTRATOR | Sprint command — planning, dispatch, monitoring, grading |
 | A    | BACKEND   | Backend logic — handlers, services, API routes  |
 | B    | FRONTEND   | Frontend UI — components, routes, stores        |
 | C    | INFRA | Infrastructure — Docker, CI/CD, builds          |
 | D    | SERVICES   | Specialized services — workers, integrations    |
 | E    | QA    | QA and security — tests, audits, scanning       |
 | F    | DATA | Data layer — models, migrations, storage        |
-| G    | LEAD    | Orchestrator — merges, docs, ship decisions     |
+| G    | LEAD    | Merge authority — sequential merge, validation, ship decisions |
 | H    | DESIGN   | Design & Creative — design system, tokens, a11y, visual specs |
 | R    | RED TEAM  | Adversarial review — break other agents' work before merge |
 

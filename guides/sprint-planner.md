@@ -1,7 +1,7 @@
 # Sprint Planner — AI Onboarding Guide
 
 > Hand this to your AI. It reads this doc + your codebase, then proposes a full sprint plan.
-> This is the bridge between "I have a codebase" and "I have 9 agents working in parallel."
+> This is the bridge between "I have a codebase" and "I have 10 agents working in parallel."
 
 ---
 
@@ -319,14 +319,14 @@ Wave 5: LEAD                           (needs everything done to merge)
 
 ### Step 5.3: Scale Agent Count
 
-Not every sprint needs all 9 agents. Scale to the work:
+Not every sprint needs all 10 agents. Scale to the work:
 
 | Discovered Work | Agents to Dispatch |
 |-----------------|-------------------|
 | 1-3 chains, single layer | 1 agent (the relevant one) |
 | 3-6 chains, 2 layers | 2-3 agents + LEAD if merge is non-trivial |
 | 6-12 chains, 3+ layers | 4-6 agents based on which territories have chains |
-| 12-20 chains, full stack | 7-9 agents, full wave structure |
+| 12-20 chains, full stack | 7-10 agents, full wave structure |
 | 20+ chains | Consider splitting into multiple sprints, or use nested teams per SCALING.md |
 
 ### Step 5.4: Write Success Criteria
@@ -448,4 +448,4 @@ Wait for operator approval before generating the full documents. The operator ma
 - [templates/completion.md](../templates/completion.md) — Completion report template
 - [core/methodology.md](../core/methodology.md) — Execution traces, chain execution, priority levels
 - [agents/README.md](../agents/README.md) — Agent roles, territories, wave structure
-- [scaling/scaling.md](../scaling/scaling.md) — Scaling beyond 9 agents
+- [scaling/scaling.md](../scaling/scaling.md) — Scaling beyond 10 agents
